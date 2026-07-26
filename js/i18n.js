@@ -1,0 +1,172 @@
+class I18n {
+  constructor({
+    defaultLocale = "he",
+    storageKey = "signed-numbers.locale",
+    messages = {}
+  } = {}) {
+    this.defaultLocale = defaultLocale;
+    this.storageKey = storageKey;
+    this.messages = messages;
+    this.supportedLocales = Object.keys(messages);
+    this.locale = this.getStoredLocale();
+    this.applyDocumentLanguage();
+  }
+
+  getStoredLocale() {
+    try {
+      const storedLocale = window.localStorage.getItem(this.storageKey);
+
+      if (this.supportedLocales.includes(storedLocale)) {
+        return storedLocale;
+      }
+    } catch (error) {
+      // The simulator still works when storage is unavailable.
+    }
+
+    return this.defaultLocale;
+  }
+
+  setLocale(locale) {
+    if (!this.supportedLocales.includes(locale) || locale === this.locale) {
+      return;
+    }
+
+    this.locale = locale;
+
+    try {
+      window.localStorage.setItem(this.storageKey, locale);
+    } catch (error) {
+      // Language switching does not depend on persistence.
+    }
+
+    this.applyDocumentLanguage();
+
+    window.dispatchEvent(
+      new CustomEvent("signed-numbers:localechange", {
+        detail: { locale }
+      })
+    );
+  }
+
+  applyDocumentLanguage() {
+    document.documentElement.lang = this.locale;
+    document.documentElement.dir = this.locale === "he" ? "rtl" : "ltr";
+  }
+
+  t(key, replacements = {}) {
+    const localeMessages = this.messages[this.locale] || {};
+    const fallbackMessages = this.messages[this.defaultLocale] || {};
+    const template = localeMessages[key] ?? fallbackMessages[key] ?? key;
+
+    return Object.entries(replacements).reduce(
+      (result, [replacementKey, value]) =>
+        result.replaceAll(`{${replacementKey}}`, String(value)),
+      template
+    );
+  }
+}
+
+const messages = {
+  he: {
+    "document.title": "מספרים מכוונים — Fundamatics",
+    "document.description":
+      "סימולטור אינטראקטיבי ללימוד חיבור וחיסור של מספרים מכוונים",
+    "header.aria": "מספרים מכוונים מבית Fundamatics",
+    "header.title": "מספרים מכוונים",
+    "header.subtitle":
+      "סימולטור גופני ללימוד חיבור וחיסור של מספרים מכוונים",
+    "header.home": "חזרה ל־Fundamatics",
+    "language.label": "בחירת שפה",
+    "controls.aria": "הגדרת תרגיל",
+    "controls.firstNumber": "המספר הראשון",
+    "controls.operation": "הפעולה",
+    "controls.secondNumber": "המספר השני",
+    "controls.start": "הפעלת התרגיל",
+    "controls.reset": "איפוס",
+    "classroom.aria": "הדמיית כיתה אינטראקטיבית",
+    "classroom.clock": "שעון קיר",
+    "classroom.window": "חלון כיתה",
+    "classroom.students": "תלמידים יושבים ליד שולחנות",
+    "numberLine.aria": "ישר מספרים על רצפת הכיתה",
+    "board.title": "מספרים מכוונים",
+    "people.teacher": "המורה",
+    "people.student": "התלמיד",
+    "message.initial":
+      "המורה והתלמיד עומדים ליד הלוח. שאר התלמידים יושבים בכיתה.",
+    "speech.initial": "בוא נבצע את התרגיל שמופיע על הלוח.",
+    "error.integer": "יש להזין מספרים שלמים בין מינוס 30 ל־30.",
+    "error.range": "התוצאה רחוקה מדי עבור רצפת הכיתה.",
+    "message.exercise": "התרגיל על הלוח הוא {exercise}.",
+    "speech.first":
+      "המספר הראשון הוא {first}. לך לעמוד על הבלטה {first}.",
+    "message.walkTo": "התלמיד הולך אל הבלטה {first}.",
+    "speech.position": "עכשיו אתה עומד על {first}.",
+    "speech.turn":
+      "הסימן {operator} אומר להסתובב 90 מעלות {direction}.",
+    "message.turn": "התלמיד מסתובב 90 מעלות {direction}.",
+    "direction.right": "ימינה",
+    "direction.left": "שמאלה",
+    "speech.walk":
+      "המספר השני הוא {second}. לך {steps} צעדים {direction}.",
+    "message.walk": "התלמיד הולך {steps} צעדים {direction}.",
+    "direction.forward": "קדימה",
+    "direction.backward": "אחורה",
+    "speech.question": "על איזו בלטה אתה עומד עכשיו?",
+    "message.arrived": "התלמיד הגיע לבלטה {position}.",
+    "speech.answer": "נכון. התשובה היא {position}."
+  },
+  en: {
+    "document.title": "Signed Numbers — Fundamatics",
+    "document.description":
+      "An interactive simulator for learning addition and subtraction with signed numbers",
+    "header.aria": "Signed Numbers by Fundamatics",
+    "header.title": "Signed Numbers",
+    "header.subtitle":
+      "A movement-based simulator for adding and subtracting signed numbers",
+    "header.home": "Back to Fundamatics",
+    "language.label": "Choose language",
+    "controls.aria": "Exercise setup",
+    "controls.firstNumber": "First number",
+    "controls.operation": "Operation",
+    "controls.secondNumber": "Second number",
+    "controls.start": "Run exercise",
+    "controls.reset": "Reset",
+    "classroom.aria": "Interactive classroom simulation",
+    "classroom.clock": "Wall clock",
+    "classroom.window": "Classroom window",
+    "classroom.students": "Students seated at desks",
+    "numberLine.aria": "Number line on the classroom floor",
+    "board.title": "Signed Numbers",
+    "people.teacher": "Teacher",
+    "people.student": "Student",
+    "message.initial":
+      "The teacher and student are standing by the board. The other students are seated.",
+    "speech.initial": "Let’s work through the exercise on the board.",
+    "error.integer": "Enter whole numbers from −30 to 30.",
+    "error.range": "The result is too far away for the classroom floor.",
+    "message.exercise": "The exercise on the board is {exercise}.",
+    "speech.first":
+      "The first number is {first}. Go and stand on tile {first}.",
+    "message.walkTo": "The student walks to tile {first}.",
+    "speech.position": "You are now standing on {first}.",
+    "speech.turn":
+      "The {operator} sign means turn 90 degrees to the {direction}.",
+    "message.turn": "The student turns 90 degrees to the {direction}.",
+    "direction.right": "right",
+    "direction.left": "left",
+    "speech.walk":
+      "The second number is {second}. Take {steps} steps {direction}.",
+    "message.walk": "The student takes {steps} steps {direction}.",
+    "direction.forward": "forward",
+    "direction.backward": "backward",
+    "speech.question": "Which tile are you standing on now?",
+    "message.arrived": "The student arrived at tile {position}.",
+    "speech.answer": "Correct. The answer is {position}."
+  }
+};
+
+window.signedNumbersI18n = new I18n({
+  defaultLocale: "he",
+  storageKey: "signed-numbers.locale",
+  messages
+});

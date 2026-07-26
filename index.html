@@ -3,1176 +3,249 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Fundamatics – מספרים מכוונים</title>
-
-  <style>
-    :root {
-      --navy: #06283d;
-      --blue: #0c4a6e;
-      --light-bg: #eef4f7;
-      --board: #174c3a;
-      --board-frame: #8b623c;
-      --wall: #e8e1d2;
-      --floor-light: #d8c8a7;
-      --floor-dark: #b9a27b;
-      --tile-active: #ffd166;
-      --tile-visited: #b9e3f4;
-      --tile-zero: #d8f3dc;
-      --text: #17313e;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      color: var(--text);
-      background: var(--light-bg);
-    }
-
-    header {
-      padding: 18px 20px;
-      text-align: center;
-      color: white;
-      background: linear-gradient(135deg, var(--navy), var(--blue));
-    }
-
-    header h1 {
-      margin: 0 0 5px;
-      font-size: 30px;
-    }
-
-    header p {
-      margin: 0;
-      opacity: 0.9;
-    }
-
-    main {
-      width: min(1200px, 96%);
-      margin: 20px auto;
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: end;
-      gap: 12px;
-      padding: 17px;
-      margin-bottom: 16px;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 145px;
-    }
-
-    label {
-      font-weight: bold;
-    }
-
-    input,
-    select,
-    button {
-      min-height: 45px;
-      border-radius: 10px;
-      font-size: 18px;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 8px 10px;
-      border: 2px solid #becbd1;
-      background: white;
-    }
-
-    button {
-      padding: 9px 20px;
-      border: none;
-      color: white;
-      background: var(--blue);
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #12648f;
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .reset-button {
-      background: #5d7079;
-    }
-
-    .message {
-      min-height: 68px;
-      padding: 14px 18px;
-      margin-bottom: 16px;
-      border-radius: 15px;
-      background: white;
-      text-align: center;
-      font-size: 21px;
-      line-height: 1.5;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
-    }
-
-    .classroom {
-      position: relative;
-      min-height: 690px;
-      overflow: hidden;
-      border: 8px solid #786048;
-      border-radius: 18px;
-      background: var(--wall);
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.18);
-    }
-
-    .front-wall {
-      position: relative;
-      height: 245px;
-      border-bottom: 8px solid #9f8c6e;
-      background:
-        linear-gradient(
-          90deg,
-          rgba(255,255,255,0.15),
-          rgba(255,255,255,0)
-        ),
-        var(--wall);
-    }
-
-    .board {
-      position: absolute;
-      top: 25px;
-      left: 50%;
-      width: min(620px, 65%);
-      height: 175px;
-      padding: 18px;
-      transform: translateX(-50%);
-      border: 12px solid var(--board-frame);
-      border-radius: 6px;
-      color: white;
-      background:
-        radial-gradient(
-          circle at 20% 30%,
-          rgba(255,255,255,0.04),
-          transparent 35%
-        ),
-        var(--board);
-      box-shadow: 0 7px 14px rgba(0, 0, 0, 0.28);
-      text-align: center;
-    }
-
-    .board-title {
-      font-size: 18px;
-      opacity: 0.85;
-    }
-
-    .board-exercise {
-      margin-top: 25px;
-      font-size: 45px;
-      font-weight: bold;
-      direction: ltr;
-    }
-
-    .board-result {
-      min-height: 32px;
-      margin-top: 14px;
-      font-size: 25px;
-      color: #ffe89a;
-      direction: ltr;
-    }
-
-    .window {
-      position: absolute;
-      top: 38px;
-      right: 25px;
-      width: 120px;
-      height: 125px;
-      border: 8px solid white;
-      background:
-        linear-gradient(
-          90deg,
-          transparent 46%,
-          white 47%,
-          white 53%,
-          transparent 54%
-        ),
-        linear-gradient(
-          transparent 46%,
-          white 47%,
-          white 53%,
-          transparent 54%
-        ),
-        #a9d8ee;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
-    }
-
-    .clock {
-      position: absolute;
-      top: 38px;
-      left: 35px;
-      width: 72px;
-      height: 72px;
-      border: 7px solid #344955;
-      border-radius: 50%;
-      background: white;
-    }
-
-    .clock::before,
-    .clock::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: 50%;
-      width: 4px;
-      border-radius: 3px;
-      background: #344955;
-      transform-origin: bottom center;
-    }
-
-    .clock::before {
-      height: 22px;
-      transform: translateX(-50%) rotate(25deg);
-    }
-
-    .clock::after {
-      height: 16px;
-      transform: translateX(-50%) rotate(120deg);
-    }
-
-    .front-people {
-      position: absolute;
-      left: 50%;
-      bottom: -3px;
-      display: flex;
-      align-items: flex-end;
-      gap: 45px;
-      transform: translateX(-50%);
-      z-index: 8;
-    }
-
-    .person {
-      position: relative;
-      width: 58px;
-      height: 112px;
-    }
-
-    .head {
-      position: relative;
-      width: 34px;
-      height: 34px;
-      margin: 0 auto;
-      border: 2px solid #263842;
-      border-radius: 50%;
-      background: #efbd94;
-    }
-
-    .hair {
-      position: absolute;
-      top: -3px;
-      left: 3px;
-      width: 26px;
-      height: 13px;
-      border-radius: 16px 16px 4px 4px;
-      background: #3f3028;
-    }
-
-    .body {
-      position: relative;
-      width: 42px;
-      height: 53px;
-      margin: -1px auto 0;
-      border: 2px solid #263842;
-      border-radius: 10px 10px 4px 4px;
-    }
-
-    .teacher .body {
-      background: #455a64;
-    }
-
-    .active-student .body,
-    .moving-student .body {
-      background: #1769aa;
-    }
-
-    .legs {
-      position: relative;
-      width: 34px;
-      height: 25px;
-      margin: 0 auto;
-    }
-
-    .legs::before,
-    .legs::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      width: 8px;
-      height: 25px;
-      border-radius: 0 0 5px 5px;
-      background: #263842;
-    }
-
-    .legs::before {
-      left: 5px;
-    }
-
-    .legs::after {
-      right: 5px;
-    }
-
-    .person-label {
-      position: absolute;
-      left: 50%;
-      bottom: -23px;
-      width: 100px;
-      transform: translateX(-50%);
-      text-align: center;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .direction-arrow {
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 21px;
-      line-height: 1;
-    }
-
-    .speech-bubble {
-      position: absolute;
-      top: -66px;
-      right: 45px;
-      width: 210px;
-      padding: 10px;
-      border: 2px solid #344955;
-      border-radius: 14px;
-      background: white;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--text);
-    }
-
-    .speech-bubble::after {
-      content: "";
-      position: absolute;
-      right: 22px;
-      bottom: -10px;
-      width: 18px;
-      height: 18px;
-      border-right: 2px solid #344955;
-      border-bottom: 2px solid #344955;
-      background: white;
-      transform: rotate(45deg);
-    }
-
-    .floor {
-      position: relative;
-      min-height: 445px;
-      padding-top: 20px;
-      background:
-        linear-gradient(rgba(255,255,255,0.17), rgba(255,255,255,0.17)),
-        repeating-linear-gradient(
-          0deg,
-          transparent 0,
-          transparent 74px,
-          rgba(90,70,40,0.28) 75px,
-          rgba(90,70,40,0.28) 77px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          var(--floor-light) 0,
-          var(--floor-light) 88px,
-          var(--floor-dark) 89px,
-          var(--floor-dark) 92px
-        );
-    }
-
-    .student-desks {
-      position: absolute;
-      top: 22px;
-      right: 25px;
-      left: 25px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px 28px;
-      z-index: 3;
-    }
-
-    .desk-unit {
-      position: relative;
-      height: 105px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-    }
-
-    .seated-student {
-      position: absolute;
-      top: 0;
-      width: 46px;
-      height: 65px;
-    }
-
-    .seated-student .head {
-      width: 27px;
-      height: 27px;
-    }
-
-    .seated-student .body {
-      width: 34px;
-      height: 36px;
-      background: #6c8ebf;
-    }
-
-    .desk {
-      position: absolute;
-      bottom: 3px;
-      width: 100px;
-      height: 42px;
-      border: 3px solid #67482d;
-      border-radius: 5px;
-      background: #b47c49;
-      box-shadow: 0 5px 0 #67482d;
-    }
-
-    .desk::before,
-    .desk::after {
-      content: "";
-      position: absolute;
-      bottom: -22px;
-      width: 7px;
-      height: 22px;
-      background: #67482d;
-    }
-
-    .desk::before {
-      left: 12px;
-    }
-
-    .desk::after {
-      right: 12px;
-    }
-
-    .number-line-area {
-      position: absolute;
-      right: 0;
-      bottom: 8px;
-      left: 0;
-      overflow-x: auto;
-      padding: 105px 22px 8px;
-      z-index: 10;
-    }
-
-    .number-line {
-      position: relative;
-      display: flex;
-      direction: ltr;
-      justify-content: center;
-      width: max-content;
-      min-width: 100%;
-      padding-top: 90px;
-    }
-
-    .tile {
-      position: relative;
-      flex: 0 0 76px;
-      height: 76px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border: 2px solid #77664e;
-      background: rgba(255, 255, 255, 0.84);
-      font-size: 21px;
-      font-weight: bold;
-      transition:
-        background 0.3s ease,
-        transform 0.3s ease;
-    }
-
-    .tile.zero {
-      background: var(--tile-zero);
-    }
-
-    .tile.visited {
-      background: var(--tile-visited);
-    }
-
-    .tile.active {
-      background: var(--tile-active);
-      transform: translateY(-5px);
-    }
-
-    .moving-student {
-      position: absolute;
-      bottom: 62px;
-      left: 50%;
-      width: 58px;
-      height: 112px;
-      opacity: 0;
-      transform-origin: center center;
-      transition:
-        left 0.65s ease,
-        transform 0.65s ease,
-        opacity 0.4s ease;
-      z-index: 20;
-    }
-
-    .result-panel {
-      min-height: 55px;
-      margin-top: 16px;
-      padding: 13px;
-      border-radius: 14px;
-      background: white;
-      text-align: center;
-      font-size: 25px;
-      font-weight: bold;
-      direction: ltr;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-    }
-
-    @media (max-width: 850px) {
-      .classroom {
-        min-height: 750px;
-      }
-
-      .board {
-        width: 65%;
-      }
-
-      .student-desks {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .window {
-        display: none;
-      }
-    }
-
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 24px;
-      }
-
-      .controls {
-        align-items: stretch;
-      }
-
-      .field,
-      button {
-        width: 100%;
-      }
-
-      .classroom {
-        min-height: 820px;
-      }
-
-      .front-wall {
-        height: 270px;
-      }
-
-      .board {
-        top: 20px;
-        width: 76%;
-        height: 160px;
-      }
-
-      .board-exercise {
-        font-size: 34px;
-      }
-
-      .front-people {
-        gap: 22px;
-      }
-
-      .speech-bubble {
-        right: 20px;
-        width: 160px;
-        font-size: 14px;
-      }
-
-      .student-desks {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .number-line-area {
-        padding-top: 120px;
-      }
-    }
-  </style>
+  <meta
+    name="description"
+    content="Interactive signed-numbers simulator by Fundamatics"
+  />
+
+  <title>מספרים מכוונים — Fundamatics</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="icon"
+    href="assets/brand/fundamatics-full-logo-white.svg"
+    type="image/svg+xml"
+  />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&amp;family=Montserrat:wght@600;700;800&amp;family=Noto+Sans+Hebrew:wght@400;600;700;800&amp;display=swap"
+  />
+  <link rel="stylesheet" href="css/style.css?v=bilingual-1" />
 </head>
 
 <body>
-  <header>
-    <h1>Fundamatics</h1>
-    <p>סימולטור גופני ללימוד מספרים מכוונים</p>
-  </header>
+  <div id="app">
+    <header
+      id="app-header"
+      class="app-header"
+      data-i18n-aria-label="header.aria"
+    >
+      <div class="brand-product-lockup">
+        <a
+          class="fundamatics-brand"
+          href="https://fundamatics.com/"
+          aria-label="Fundamatics — Maths for life"
+        >
+          <img
+            src="assets/brand/fundamatics-full-logo-white.svg"
+            alt="Fundamatics"
+          />
+          <span class="brand-tagline">Maths for life</span>
+        </a>
 
-  <main>
-    <section class="controls">
-      <div class="field">
-        <label for="firstNumber">המספר הראשון</label>
-        <input
-          id="firstNumber"
-          type="number"
-          value="0"
-          min="-30"
-          max="30"
-          step="1"
-        />
-      </div>
+        <span class="brand-divider" aria-hidden="true">/</span>
 
-      <div class="field">
-        <label for="operator">הפעולה</label>
-        <select id="operator">
-          <option value="+">+</option>
-          <option value="-">−</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="secondNumber">המספר השני</label>
-        <input
-          id="secondNumber"
-          type="number"
-          value="3"
-          min="-30"
-          max="30"
-          step="1"
-        />
-      </div>
-
-      <button id="startButton">הפעל את התרגיל</button>
-      <button id="resetButton" class="reset-button">איפוס</button>
-    </section>
-
-    <div id="message" class="message">
-      המורה והתלמיד עומדים ליד הלוח. שאר התלמידים יושבים בכיתה.
-    </div>
-
-    <section class="classroom">
-      <div class="front-wall">
-        <div class="clock"></div>
-        <div class="window"></div>
-
-        <div class="board">
-          <div class="board-title">מספרים מכוונים</div>
-          <div id="boardExercise" class="board-exercise">0 + 3</div>
-          <div id="boardResult" class="board-result"></div>
-        </div>
-
-        <div id="frontPeople" class="front-people">
-          <div class="person teacher">
-            <div id="speechBubble" class="speech-bubble">
-              בוא נבצע את התרגיל שמופיע על הלוח.
-            </div>
-
-            <div class="head">
-              <div class="hair"></div>
-            </div>
-
-            <div class="body"></div>
-            <div class="legs"></div>
-            <div class="person-label">המורה</div>
-          </div>
-
-          <div id="standingStudent" class="person active-student">
-            <div class="head">
-              <div class="hair"></div>
-            </div>
-
-            <div class="body">
-              <div class="direction-arrow">↑</div>
-            </div>
-
-            <div class="legs"></div>
-            <div class="person-label">התלמיד</div>
-          </div>
+        <div class="product-identity">
+          <h1 data-i18n="header.title">מספרים מכוונים</h1>
+          <p data-i18n="header.subtitle">
+            סימולטור גופני ללימוד חיבור וחיסור של מספרים מכוונים
+          </p>
         </div>
       </div>
 
-      <div class="floor">
-        <div class="student-desks">
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
-
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
-
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
-
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
-
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
-
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
-
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
-
-          <div class="desk-unit">
-            <div class="seated-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body"></div>
-            </div>
-            <div class="desk"></div>
-          </div>
+      <div class="header-actions">
+        <div
+          class="language-switcher"
+          role="group"
+          data-i18n-aria-label="language.label"
+        >
+          <button
+            class="language-option"
+            type="button"
+            data-locale="he"
+            lang="he"
+          >
+            עברית
+          </button>
+          <button
+            class="language-option"
+            type="button"
+            data-locale="en"
+            lang="en"
+          >
+            English
+          </button>
         </div>
 
-        <div class="number-line-area">
-          <div id="numberLine" class="number-line">
-            <div id="movingStudent" class="moving-student">
-              <div class="head">
-                <div class="hair"></div>
-              </div>
+        <a
+          class="fundamatics-home-link"
+          href="https://fundamatics.com/"
+          data-i18n="header.home"
+        >
+          חזרה ל־Fundamatics
+        </a>
+      </div>
+    </header>
 
-              <div class="body">
-                <div class="direction-arrow">↑</div>
-              </div>
+    <main>
+      <section
+        class="controls"
+        data-i18n-aria-label="controls.aria"
+      >
+        <div class="field">
+          <label for="firstNumber" data-i18n="controls.firstNumber">
+            המספר הראשון
+          </label>
+          <input
+            id="firstNumber"
+            type="number"
+            value="0"
+            min="-30"
+            max="30"
+            step="1"
+            inputmode="numeric"
+          />
+        </div>
 
+        <div class="field field-operator">
+          <label for="operator" data-i18n="controls.operation">הפעולה</label>
+          <select id="operator">
+            <option value="+">+</option>
+            <option value="-">−</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="secondNumber" data-i18n="controls.secondNumber">
+            המספר השני
+          </label>
+          <input
+            id="secondNumber"
+            type="number"
+            value="3"
+            min="-30"
+            max="30"
+            step="1"
+            inputmode="numeric"
+          />
+        </div>
+
+        <button id="startButton" type="button" data-i18n="controls.start">
+          הפעלת התרגיל
+        </button>
+        <button
+          id="resetButton"
+          class="reset-button"
+          type="button"
+          data-i18n="controls.reset"
+        >
+          איפוס
+        </button>
+      </section>
+
+      <div
+        id="message"
+        class="message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <section
+        class="classroom"
+        data-i18n-aria-label="classroom.aria"
+      >
+        <div class="front-wall">
+          <div
+            class="clock"
+            role="img"
+            data-i18n-aria-label="classroom.clock"
+          ></div>
+          <div
+            class="window"
+            role="img"
+            data-i18n-aria-label="classroom.window"
+          ></div>
+
+          <div class="board">
+            <div class="board-title" data-i18n="board.title">
+              מספרים מכוונים
+            </div>
+            <div id="boardExercise" class="board-exercise">0 + 3</div>
+            <div
+              id="boardResult"
+              class="board-result"
+              aria-live="polite"
+            ></div>
+          </div>
+
+          <div class="front-people">
+            <div class="person teacher">
+              <div
+                id="speechBubble"
+                class="speech-bubble"
+                aria-live="polite"
+              ></div>
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
               <div class="legs"></div>
-              <div class="person-label">התלמיד</div>
+              <div class="person-label" data-i18n="people.teacher">
+                המורה
+              </div>
+            </div>
+
+            <div id="standingStudent" class="person active-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body">
+                <div class="direction-arrow" aria-hidden="true">↑</div>
+              </div>
+              <div class="legs"></div>
+              <div class="person-label" data-i18n="people.student">
+                התלמיד
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <div id="resultPanel" class="result-panel"></div>
-  </main>
-
-  <script>
-    const firstNumberInput =
-      document.getElementById("firstNumber");
-
-    const operatorInput =
-      document.getElementById("operator");
-
-    const secondNumberInput =
-      document.getElementById("secondNumber");
-
-    const startButton =
-      document.getElementById("startButton");
-
-    const resetButton =
-      document.getElementById("resetButton");
-
-    const messageBox =
-      document.getElementById("message");
-
-    const boardExercise =
-      document.getElementById("boardExercise");
-
-    const boardResult =
-      document.getElementById("boardResult");
-
-    const speechBubble =
-      document.getElementById("speechBubble");
-
-    const standingStudent =
-      document.getElementById("standingStudent");
-
-    const movingStudent =
-      document.getElementById("movingStudent");
-
-    const numberLine =
-      document.getElementById("numberLine");
-
-    const resultPanel =
-      document.getElementById("resultPanel");
-
-    const TILE_WIDTH = 76;
-
-    let tiles = [];
-    let minimumTile = -10;
-    let maximumTile = 10;
-    let currentPosition = 0;
-    let currentRotation = 0;
-    let isRunning = false;
-
-    function sleep(milliseconds) {
-      return new Promise(resolve => {
-        setTimeout(resolve, milliseconds);
-      });
-    }
-
-    function isValidInteger(number) {
-      return Number.isInteger(number) && Math.abs(number) <= 30;
-    }
-
-    function formatNumber(number) {
-      return number < 0 ? `(${number})` : `${number}`;
-    }
-
-    function calculateResult(firstNumber, operator, secondNumber) {
-      return operator === "+"
-        ? firstNumber + secondNumber
-        : firstNumber - secondNumber;
-    }
-
-    function updateBoardExercise() {
-      const firstNumber = Number(firstNumberInput.value);
-      const operator = operatorInput.value;
-      const secondNumber = Number(secondNumberInput.value);
-
-      boardExercise.textContent =
-        `${firstNumber} ${operator} ${formatNumber(secondNumber)}`;
-    }
-
-    function createNumberLine(firstNumber, finalNumber) {
-      minimumTile = Math.min(
-        -10,
-        firstNumber - 4,
-        finalNumber - 4
-      );
-
-      maximumTile = Math.max(
-        10,
-        firstNumber + 4,
-        finalNumber + 4
-      );
-
-      numberLine
-        .querySelectorAll(".tile")
-        .forEach(tile => tile.remove());
-
-      tiles = [];
-
-      for (
-        let number = minimumTile;
-        number <= maximumTile;
-        number += 1
-      ) {
-        const tile = document.createElement("div");
-
-        tile.className = "tile";
-        tile.dataset.number = number;
-        tile.textContent = number;
-
-        if (number === 0) {
-          tile.classList.add("zero");
-        }
-
-        numberLine.appendChild(tile);
-        tiles.push(tile);
-      }
-
-      numberLine.appendChild(movingStudent);
-    }
-
-    function getTile(number) {
-      return tiles.find(tile => {
-        return Number(tile.dataset.number) === number;
-      });
-    }
-
-    function getStudentLeft(number) {
-      const tileIndex = number - minimumTile;
-      return tileIndex * TILE_WIDTH + TILE_WIDTH / 2;
-    }
-
-    function clearHighlights() {
-      tiles.forEach(tile => {
-        tile.classList.remove("active", "visited");
-      });
-    }
-
-    function highlightTile(number) {
-      const tile = getTile(number);
-
-      if (!tile) {
-        return;
-      }
-
-      tile.classList.add("active");
-
-      tile.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest"
-      });
-    }
-
-    function placeStudentOnTile(number) {
-      currentPosition = number;
-      currentRotation = 0;
-
-      movingStudent.style.left =
-        `${getStudentLeft(number)}px`;
-
-      movingStudent.style.transform =
-        "translateX(-50%) rotate(0deg)";
-
-      clearHighlights();
-      highlightTile(number);
-    }
-
-    async function runSimulation() {
-      if (isRunning) {
-        return;
-      }
-
-      const firstNumber = Number(firstNumberInput.value);
-      const operator = operatorInput.value;
-      const secondNumber = Number(secondNumberInput.value);
-
-      if (
-        !isValidInteger(firstNumber) ||
-        !isValidInteger(secondNumber)
-      ) {
-        messageBox.textContent =
-          "יש להזין מספרים שלמים בין מינוס 30 ל־30.";
-        return;
-      }
-
-      const result = calculateResult(
-        firstNumber,
-        operator,
-        secondNumber
-      );
-
-      if (Math.abs(result) > 60) {
-        messageBox.textContent =
-          "התוצאה רחוקה מדי עבור רצפת הכיתה.";
-        return;
-      }
-
-      isRunning = true;
-      startButton.disabled = true;
-
-      boardResult.textContent = "";
-      resultPanel.textContent = "";
-
-      updateBoardExercise();
-      createNumberLine(firstNumber, result);
-
-      messageBox.textContent =
-        `התרגיל על הלוח הוא ${firstNumber} ${operator} ${formatNumber(secondNumber)}.`;
-
-      speechBubble.textContent =
-        `המספר הראשון הוא ${firstNumber}. לך לעמוד על הבלטה ${firstNumber}.`;
-
-      await sleep(1500);
-
-      standingStudent.style.opacity = "0";
-
-      placeStudentOnTile(firstNumber);
-      movingStudent.style.opacity = "1";
-
-      messageBox.textContent =
-        `התלמיד הולך אל הבלטה ${firstNumber}.`;
-
-      await sleep(1500);
-
-      speechBubble.textContent =
-        `עכשיו אתה עומד על ${firstNumber}.`;
-
-      await sleep(900);
-
-      const turnAmount = operator === "+" ? 90 : -90;
-
-      const turnDirection =
-        operator === "+" ? "ימינה" : "שמאלה";
-
-      currentRotation += turnAmount;
-
-      speechBubble.textContent =
-        `הסימן ${operator} אומר להסתובב 90 מעלות ${turnDirection}.`;
-
-      messageBox.textContent =
-        `התלמיד מסתובב 90 מעלות ${turnDirection}.`;
-
-      movingStudent.style.transform =
-        `translateX(-50%) rotate(${currentRotation}deg)`;
-
-      await sleep(1600);
-
-      const numberOfSteps = Math.abs(secondNumber);
-
-      const walkingDirection =
-        secondNumber >= 0 ? "קדימה" : "אחורה";
-
-      speechBubble.textContent =
-        `המספר השני הוא ${secondNumber}. לך ${numberOfSteps} צעדים ${walkingDirection}.`;
-
-      messageBox.textContent =
-        `התלמיד הולך ${numberOfSteps} צעדים ${walkingDirection}.`;
-
-      await sleep(1300);
-
-      const directionOnLine =
-        operator === "+"
-          ? Math.sign(secondNumber)
-          : -Math.sign(secondNumber);
-
-      if (numberOfSteps === 0) {
-        await sleep(700);
-      }
-
-      for (
-        let step = 0;
-        step < numberOfSteps;
-        step += 1
-      ) {
-        const oldTile = getTile(currentPosition);
-
-        if (oldTile) {
-          oldTile.classList.remove("active");
-          oldTile.classList.add("visited");
-        }
-
-        currentPosition += directionOnLine;
-
-        movingStudent.style.left =
-          `${getStudentLeft(currentPosition)}px`;
-
-        const currentTile = getTile(currentPosition);
-
-        if (currentTile) {
-          currentTile.classList.add("active");
-
-          currentTile.scrollIntoView({
-            behavior: "smooth",
-            inline: "center",
-            block: "nearest"
-          });
-        }
-
-        await sleep(650);
-      }
-
-      speechBubble.textContent =
-        `על איזו בלטה אתה עומד עכשיו?`;
-
-      messageBox.textContent =
-        `התלמיד הגיע לבלטה ${currentPosition}.`;
-
-      await sleep(1300);
-
-      boardResult.textContent =
-        `${firstNumber} ${operator} ${formatNumber(secondNumber)} = ${currentPosition}`;
-
-      resultPanel.textContent =
-        `${firstNumber} ${operator} ${formatNumber(secondNumber)} = ${currentPosition}`;
-
-      speechBubble.textContent =
-        `נכון. התשובה היא ${currentPosition}.`;
-
-      isRunning = false;
-      startButton.disabled = false;
-    }
-
-    function resetSimulator() {
-      if (isRunning) {
-        return;
-      }
-
-      firstNumberInput.value = 0;
-      operatorInput.value = "+";
-      secondNumberInput.value = 3;
-
-      currentPosition = 0;
-      currentRotation = 0;
-
-      standingStudent.style.opacity = "1";
-      movingStudent.style.opacity = "0";
-
-      boardResult.textContent = "";
-      resultPanel.textContent = "";
-
-      messageBox.textContent =
-        "המורה והתלמיד עומדים ליד הלוח. שאר התלמידים יושבים בכיתה.";
-
-      speechBubble.textContent =
-        "בוא נבצע את התרגיל שמופיע על הלוח.";
-
-      updateBoardExercise();
-      createNumberLine(0, 3);
-      clearHighlights();
-    }
-
-    firstNumberInput.addEventListener(
-      "input",
-      updateBoardExercise
-    );
-
-    operatorInput.addEventListener(
-      "change",
-      updateBoardExercise
-    );
-
-    secondNumberInput.addEventListener(
-      "input",
-      updateBoardExercise
-    );
-
-    startButton.addEventListener(
-      "click",
-      runSimulation
-    );
-
-    resetButton.addEventListener(
-      "click",
-      resetSimulator
-    );
-
-    resetSimulator();
-  </script>
+        <div class="floor">
+          <div
+            id="studentDesks"
+            class="student-desks"
+            data-i18n-aria-label="classroom.students"
+          ></div>
+
+          <div class="number-line-area">
+            <div
+              id="numberLine"
+              class="number-line"
+              role="img"
+              data-i18n-aria-label="numberLine.aria"
+            >
+              <div id="movingStudent" class="moving-student">
+                <div class="head"><div class="hair"></div></div>
+                <div class="body">
+                  <div class="direction-arrow" aria-hidden="true">↑</div>
+                </div>
+                <div class="legs"></div>
+                <div class="person-label" data-i18n="people.student">
+                  התלמיד
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div
+        id="resultPanel"
+        class="result-panel"
+        role="status"
+        aria-live="polite"
+      ></div>
+    </main>
+  </div>
+
+  <script src="js/i18n.js?v=bilingual-1"></script>
+  <script src="js/app.js?v=bilingual-1"></script>
 </body>
 </html>
