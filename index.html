@@ -4,21 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Fundamatics – סימולטור מספרים מכוונים</title>
+  <title>Fundamatics – מספרים מכוונים</title>
 
   <style>
     :root {
-      --header-dark: #06283d;
-      --header-light: #0c4a6e;
+      --dark-blue: #06283d;
+      --blue: #0c4a6e;
+      --light-blue: #d9edf7;
       --background: #eef4f7;
       --tile: #ffffff;
-      --tile-border: #8ba3b0;
+      --tile-border: #869aa5;
       --active: #ffd166;
       --visited: #cde8f5;
       --zero: #d8f3dc;
       --text: #16313f;
-      --button: #0c4a6e;
-      --button-hover: #12648f;
     }
 
     * {
@@ -29,19 +28,15 @@
       margin: 0;
       min-height: 100vh;
       font-family: Arial, sans-serif;
-      background: var(--background);
       color: var(--text);
+      background: var(--background);
     }
 
     header {
-      padding: 22px 20px;
-      color: white;
+      padding: 20px;
       text-align: center;
-      background: linear-gradient(
-        135deg,
-        var(--header-dark),
-        var(--header-light)
-      );
+      color: white;
+      background: linear-gradient(135deg, var(--dark-blue), var(--blue));
     }
 
     header h1 {
@@ -55,25 +50,40 @@
     }
 
     main {
-      width: min(1100px, 94%);
-      margin: 24px auto;
+      width: min(1150px, 95%);
+      margin: 22px auto;
     }
 
-    .control-panel {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr auto;
-      gap: 12px;
-      align-items: end;
-      padding: 20px;
-      background: white;
+    .message-box {
+      min-height: 76px;
+      margin-bottom: 16px;
+      padding: 18px;
       border-radius: 16px;
-      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+      background: white;
+      text-align: center;
+      font-size: 22px;
+      line-height: 1.5;
+      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding: 18px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
+      min-width: 140px;
     }
 
     label {
@@ -83,7 +93,7 @@
     input,
     select,
     button {
-      min-height: 46px;
+      min-height: 45px;
       border-radius: 10px;
       font-size: 18px;
     }
@@ -91,83 +101,147 @@
     input,
     select {
       width: 100%;
-      padding: 8px 12px;
-      border: 2px solid #c2d1d8;
+      padding: 8px 10px;
+      border: 2px solid #becdd4;
       background: white;
     }
 
     button {
-      padding: 8px 20px;
+      padding: 9px 20px;
       border: none;
       color: white;
-      background: var(--button);
-      cursor: pointer;
+      background: var(--blue);
       font-weight: bold;
+      cursor: pointer;
     }
 
     button:hover {
-      background: var(--button-hover);
+      background: #12648f;
     }
 
     button:disabled {
-      opacity: 0.55;
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
-    .reset-button {
-      background: #596d78;
-    }
-
-    .exercise {
-      margin: 20px 0 12px;
-      text-align: center;
-      font-size: 34px;
-      font-weight: bold;
-      direction: ltr;
-    }
-
-    .status {
-      min-height: 70px;
-      margin-bottom: 18px;
-      padding: 16px;
-      border-radius: 14px;
-      background: white;
-      text-align: center;
-      font-size: 21px;
-      line-height: 1.5;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    .secondary-button {
+      background: #5d7079;
     }
 
     .classroom {
       position: relative;
-      min-height: 310px;
+      min-height: 410px;
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 40px 25px 25px;
-      background:
-        linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)),
-        repeating-linear-gradient(
-          90deg,
-          #d4c8ae 0,
-          #d4c8ae 78px,
-          #bbae92 79px,
-          #bbae92 81px
-        );
+      padding: 30px 25px;
       border: 8px solid #8e7656;
       border-radius: 18px;
-      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.2);
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)),
+        repeating-linear-gradient(
+          90deg,
+          #d5c9af 0,
+          #d5c9af 78px,
+          #bcae90 79px,
+          #bcae90 81px
+        );
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.22);
     }
 
-    .teacher {
+    .starting-area {
       position: absolute;
-      top: 10px;
+      top: 25px;
+      left: 50%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 35px;
+      transform: translateX(-50%);
+      z-index: 5;
+    }
+
+    .person {
+      position: relative;
+      width: 52px;
+      height: 92px;
+      transition:
+        left 0.65s ease,
+        bottom 0.65s ease,
+        transform 0.65s ease,
+        opacity 0.4s ease;
+    }
+
+    .head {
+      width: 30px;
+      height: 30px;
+      margin: 0 auto;
+      border: 2px solid #263842;
+      border-radius: 50%;
+      background: #f0bd91;
+    }
+
+    .body {
+      position: relative;
+      width: 38px;
+      height: 48px;
+      margin: -1px auto 0;
+      border: 2px solid #263842;
+      border-radius: 9px 9px 4px 4px;
+    }
+
+    .teacher .body {
+      background: #384b55;
+    }
+
+    .student .body {
+      background: #1565a7;
+    }
+
+    .person-label {
+      position: absolute;
+      width: 90px;
+      bottom: -24px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 5px 14px;
-      border-radius: 20px;
-      color: white;
-      background: #384b55;
+      text-align: center;
+      font-weight: bold;
       font-size: 15px;
+    }
+
+    .direction-arrow {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 22px;
+    }
+
+    .speech-bubble {
+      position: absolute;
+      top: -10px;
+      right: 75px;
+      width: 230px;
+      padding: 12px;
+      border: 2px solid #344b57;
+      border-radius: 15px;
+      background: white;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      right: 35px;
+      width: 20px;
+      height: 20px;
+      border-right: 2px solid #344b57;
+      border-bottom: 2px solid #344b57;
+      background: white;
+      transform: rotate(45deg);
     }
 
     .number-line {
@@ -178,7 +252,7 @@
       min-width: 100%;
       justify-content: center;
       align-items: flex-end;
-      padding-top: 120px;
+      padding-top: 260px;
     }
 
     .tile {
@@ -211,87 +285,70 @@
       transform: translateY(-5px);
     }
 
-    .student {
+    .moving-student {
       position: absolute;
+      bottom: 72px;
       left: 50%;
-      bottom: 55px;
-      width: 42px;
-      height: 62px;
+      width: 52px;
+      height: 92px;
       transform-origin: center center;
       transition:
-        left 0.6s ease,
-        transform 0.6s ease;
-      z-index: 4;
+        left 0.65s ease,
+        transform 0.65s ease,
+        opacity 0.4s ease;
+      opacity: 0;
+      z-index: 10;
     }
 
-    .student-head {
-      width: 24px;
-      height: 24px;
-      margin: 0 auto;
-      border-radius: 50%;
-      background: #f0bd91;
-      border: 2px solid #263842;
-    }
-
-    .student-body {
-      position: relative;
-      width: 30px;
-      height: 34px;
-      margin: -1px auto 0;
-      border-radius: 8px 8px 3px 3px;
-      background: #1565a7;
-      border: 2px solid #263842;
-    }
-
-    .student-arrow {
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 20px;
-      line-height: 1;
+    .exercise {
+      margin: 18px 0 10px;
+      text-align: center;
+      font-size: 34px;
+      font-weight: bold;
+      direction: ltr;
     }
 
     .result {
-      min-height: 55px;
-      margin-top: 18px;
-      padding: 14px;
-      border-radius: 13px;
-      text-align: center;
-      font-size: 25px;
-      font-weight: bold;
-      background: white;
-    }
-
-    .rules {
-      margin-top: 20px;
-      padding: 18px 22px;
-      background: white;
+      min-height: 60px;
+      margin-top: 16px;
+      padding: 15px;
       border-radius: 14px;
-      line-height: 1.8;
+      background: white;
+      text-align: center;
+      font-size: 27px;
+      font-weight: bold;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
     }
 
-    .rules h2 {
-      margin-top: 0;
-      font-size: 22px;
+    .hidden {
+      display: none;
     }
 
     @media (max-width: 700px) {
-      .control-panel {
-        grid-template-columns: 1fr 90px 1fr;
-      }
-
-      .control-panel button {
-        grid-column: span 3;
-      }
-
       header h1 {
         font-size: 24px;
       }
 
-      .exercise {
-        font-size: 28px;
+      .message-box {
+        font-size: 19px;
+      }
+
+      .speech-bubble {
+        width: 180px;
+        right: 55px;
+        font-size: 15px;
+      }
+
+      .controls {
+        align-items: stretch;
+      }
+
+      .field {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
       }
     }
   </style>
@@ -304,20 +361,29 @@
   </header>
 
   <main>
-    <section class="control-panel">
+    <div id="messageBox" class="message-box">
+      המורה והתלמיד עומדים יחד מחוץ לציר המספרים.
+    </div>
+
+    <section id="startControls" class="controls">
       <div class="field">
-        <label for="firstNumber">המספר הראשון</label>
+        <label for="startingNumber">מאיזו בלטה תרצה להתחיל?</label>
         <input
-          id="firstNumber"
+          id="startingNumber"
           type="number"
           value="0"
-          min="-20"
-          max="20"
+          min="-50"
+          max="50"
+          step="1"
         />
       </div>
 
+      <button id="chooseTileButton">בחר את הבלטה</button>
+    </section>
+
+    <section id="exerciseControls" class="controls hidden">
       <div class="field">
-        <label for="operator">פעולה</label>
+        <label for="operator">סימן הפעולה</label>
         <select id="operator">
           <option value="+">+</option>
           <option value="-">−</option>
@@ -330,74 +396,112 @@
           id="secondNumber"
           type="number"
           value="3"
-          min="-20"
-          max="20"
+          min="-50"
+          max="50"
+          step="1"
         />
       </div>
 
-      <button id="startButton">בצע את התרגיל</button>
-      <button id="resetButton" class="reset-button">איפוס</button>
+      <button id="runButton">בצע את התרגיל</button>
+      <button id="newExerciseButton" class="secondary-button">
+        תרגיל חדש מאותה בלטה
+      </button>
+      <button id="resetButton" class="secondary-button">
+        התחל מחדש
+      </button>
     </section>
 
-    <div id="exercise" class="exercise">0 + 3</div>
-
-    <div id="status" class="status">
-      התלמיד עומד על הבלטה של המספר הראשון ופניו אל המורה.
-    </div>
+    <div id="exercise" class="exercise"></div>
 
     <section id="classroom" class="classroom">
-      <div class="teacher">המורה</div>
+      <div id="startingArea" class="starting-area">
+        <div class="person teacher">
+          <div class="speech-bubble">
+            מאיזו בלטה אתה רוצה להתחיל?
+          </div>
+
+          <div class="head"></div>
+
+          <div class="body"></div>
+
+          <div class="person-label">המורה</div>
+        </div>
+
+        <div id="waitingStudent" class="person student">
+          <div class="head"></div>
+
+          <div class="body">
+            <div class="direction-arrow">↑</div>
+          </div>
+
+          <div class="person-label">התלמיד</div>
+        </div>
+      </div>
 
       <div id="numberLine" class="number-line">
-        <div id="student" class="student">
-          <div class="student-head"></div>
-          <div class="student-body">
-            <div class="student-arrow">↑</div>
+        <div id="movingStudent" class="moving-student student">
+          <div class="head"></div>
+
+          <div class="body">
+            <div class="direction-arrow">↑</div>
           </div>
+
+          <div class="person-label">התלמיד</div>
         </div>
       </div>
     </section>
 
     <div id="result" class="result"></div>
-
-    <section class="rules">
-      <h2>כללי הפעילות</h2>
-
-      <div>
-        המספר הראשון קובע על איזו בלטה עומדים.
-      </div>
-
-      <div>
-        סימן פלוס גורם לפנייה של 90 מעלות ימינה.
-      </div>
-
-      <div>
-        סימן מינוס גורם לפנייה של 90 מעלות שמאלה.
-      </div>
-
-      <div>
-        מספר שני חיובי פירושו ללכת קדימה.
-      </div>
-
-      <div>
-        מספר שני שלילי פירושו ללכת אחורה.
-      </div>
-    </section>
   </main>
 
   <script>
-    const firstNumberInput = document.getElementById("firstNumber");
-    const operatorInput = document.getElementById("operator");
-    const secondNumberInput = document.getElementById("secondNumber");
+    const startingNumberInput =
+      document.getElementById("startingNumber");
 
-    const startButton = document.getElementById("startButton");
-    const resetButton = document.getElementById("resetButton");
+    const operatorInput =
+      document.getElementById("operator");
 
-    const numberLine = document.getElementById("numberLine");
-    const student = document.getElementById("student");
-    const exercise = document.getElementById("exercise");
-    const statusBox = document.getElementById("status");
-    const resultBox = document.getElementById("result");
+    const secondNumberInput =
+      document.getElementById("secondNumber");
+
+    const chooseTileButton =
+      document.getElementById("chooseTileButton");
+
+    const runButton =
+      document.getElementById("runButton");
+
+    const newExerciseButton =
+      document.getElementById("newExerciseButton");
+
+    const resetButton =
+      document.getElementById("resetButton");
+
+    const startControls =
+      document.getElementById("startControls");
+
+    const exerciseControls =
+      document.getElementById("exerciseControls");
+
+    const messageBox =
+      document.getElementById("messageBox");
+
+    const exerciseBox =
+      document.getElementById("exercise");
+
+    const resultBox =
+      document.getElementById("result");
+
+    const numberLine =
+      document.getElementById("numberLine");
+
+    const startingArea =
+      document.getElementById("startingArea");
+
+    const waitingStudent =
+      document.getElementById("waitingStudent");
+
+    const movingStudent =
+      document.getElementById("movingStudent");
 
     const TILE_WIDTH = 78;
 
@@ -405,38 +509,43 @@
     let minimumTile = -10;
     let maximumTile = 10;
     let currentPosition = 0;
+    let currentRotation = 0;
     let isRunning = false;
+    let studentIsOnLine = false;
 
     function sleep(milliseconds) {
-      return new Promise(resolve => setTimeout(resolve, milliseconds));
-    }
-
-    function formatNumber(number) {
-      return number < 0 ? `(${number})` : number;
+      return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+      });
     }
 
     function calculateResult(firstNumber, operator, secondNumber) {
-      if (operator === "+") {
-        return firstNumber + secondNumber;
-      }
-
-      return firstNumber - secondNumber;
+      return operator === "+"
+        ? firstNumber + secondNumber
+        : firstNumber - secondNumber;
     }
 
-    function updateExerciseText() {
-      const firstNumber = Number(firstNumberInput.value);
-      const operator = operatorInput.value;
-      const secondNumber = Number(secondNumberInput.value);
-
-      exercise.textContent =
-        `${firstNumber} ${operator} ${formatNumber(secondNumber)}`;
+    function formatSecondNumber(number) {
+      return number < 0 ? `(${number})` : `${number}`;
     }
 
-    function createNumberLine(firstNumber, result) {
-      minimumTile = Math.min(-10, firstNumber - 3, result - 3);
-      maximumTile = Math.max(10, firstNumber + 3, result + 3);
+    function createNumberLine(firstNumber, finalNumber = firstNumber) {
+      minimumTile = Math.min(
+        -10,
+        firstNumber - 4,
+        finalNumber - 4
+      );
 
-      numberLine.querySelectorAll(".tile").forEach(tile => tile.remove());
+      maximumTile = Math.max(
+        10,
+        firstNumber + 4,
+        finalNumber + 4
+      );
+
+      numberLine
+        .querySelectorAll(".tile")
+        .forEach(tile => tile.remove());
+
       tiles = [];
 
       for (
@@ -458,13 +567,19 @@
         tiles.push(tile);
       }
 
-      numberLine.appendChild(student);
+      numberLine.appendChild(movingStudent);
     }
 
     function getTile(number) {
-      return tiles.find(
-        tile => Number(tile.dataset.number) === number
-      );
+      return tiles.find(tile => {
+        return Number(tile.dataset.number) === number;
+      });
+    }
+
+    function getStudentLeftPosition(number) {
+      const tileIndex = number - minimumTile;
+
+      return tileIndex * TILE_WIDTH + TILE_WIDTH / 2;
     }
 
     function clearTileHighlights() {
@@ -473,123 +588,198 @@
       });
     }
 
-    function placeStudent(number, rotation = 0) {
-      const index = number - minimumTile;
-      const leftPosition = index * TILE_WIDTH + TILE_WIDTH / 2;
-
-      student.style.left = `${leftPosition}px`;
-      student.style.transform =
-        `translateX(-50%) rotate(${rotation}deg)`;
-
-      currentPosition = number;
-
-      clearTileHighlights();
-
-      const activeTile = getTile(number);
-
-      if (activeTile) {
-        activeTile.classList.add("active");
-        activeTile.scrollIntoView({
-          behavior: "smooth",
-          inline: "center",
-          block: "nearest"
-        });
-      }
-    }
-
-    function markVisited(number) {
+    function highlightCurrentTile(number) {
       const tile = getTile(number);
 
-      if (tile) {
-        tile.classList.add("visited");
+      if (!tile) {
+        return;
       }
+
+      tile.classList.add("active");
+
+      tile.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest"
+      });
     }
 
-    function validateNumbers(firstNumber, secondNumber, result) {
-      const values = [firstNumber, secondNumber, result];
+    function placeStudentOnTile(number) {
+      currentPosition = number;
+      currentRotation = 0;
 
-      return values.every(
-        value => Number.isInteger(value) && Math.abs(value) <= 50
-      );
+      movingStudent.style.left =
+        `${getStudentLeftPosition(number)}px`;
+
+      movingStudent.style.transform =
+        "translateX(-50%) rotate(0deg)";
+
+      movingStudent.style.opacity = "1";
+
+      waitingStudent.style.opacity = "0";
+
+      clearTileHighlights();
+      highlightCurrentTile(number);
     }
 
-    async function runSimulation() {
+    function updateExerciseText() {
+      if (!studentIsOnLine) {
+        exerciseBox.textContent = "";
+        return;
+      }
+
+      const operator = operatorInput.value;
+      const secondNumber = Number(secondNumberInput.value);
+
+      exerciseBox.textContent =
+        `${currentPosition} ${operator} ${formatSecondNumber(secondNumber)}`;
+    }
+
+    function validateInteger(value) {
+      return Number.isInteger(value) && Math.abs(value) <= 50;
+    }
+
+    async function chooseStartingTile() {
       if (isRunning) {
         return;
       }
 
-      const firstNumber = Number(firstNumberInput.value);
+      const startingNumber =
+        Number(startingNumberInput.value);
+
+      if (!validateInteger(startingNumber)) {
+        messageBox.textContent =
+          "יש לבחור מספר שלם בין מינוס 50 ל־50.";
+        return;
+      }
+
+      isRunning = true;
+      chooseTileButton.disabled = true;
+
+      createNumberLine(startingNumber);
+
+      messageBox.textContent =
+        `בחרת להתחיל מהבלטה ${startingNumber}. ` +
+        "התלמיד ניגש אל הבלטה.";
+
+      await sleep(900);
+
+      placeStudentOnTile(startingNumber);
+
+      await sleep(700);
+
+      studentIsOnLine = true;
+
+      messageBox.textContent =
+        `התלמיד עומד על הבלטה ${startingNumber} ` +
+        "ופניו אל המורה.";
+
+      startingArea.style.opacity = "0.45";
+
+      startControls.classList.add("hidden");
+      exerciseControls.classList.remove("hidden");
+
+      resultBox.textContent = "";
+      updateExerciseText();
+
+      chooseTileButton.disabled = false;
+      isRunning = false;
+    }
+
+    async function runSimulation() {
+      if (isRunning || !studentIsOnLine) {
+        return;
+      }
+
+      const firstNumber = currentPosition;
       const operator = operatorInput.value;
       const secondNumber = Number(secondNumberInput.value);
+
+      if (!validateInteger(secondNumber)) {
+        messageBox.textContent =
+          "יש להזין מספר שני שלם בין מינוס 50 ל־50.";
+        return;
+      }
+
       const result = calculateResult(
         firstNumber,
         operator,
         secondNumber
       );
 
-      if (!validateNumbers(firstNumber, secondNumber, result)) {
-        statusBox.textContent =
-          "יש להזין מספרים שלמים כך שהתוצאה תהיה בין מינוס 50 ל־50.";
+      if (Math.abs(result) > 100) {
+        messageBox.textContent =
+          "התוצאה גדולה מדי עבור הציר הנוכחי.";
         return;
       }
 
       isRunning = true;
-      startButton.disabled = true;
+      runButton.disabled = true;
+      newExerciseButton.disabled = true;
       resultBox.textContent = "";
 
       createNumberLine(firstNumber, result);
+      placeStudentOnTile(firstNumber);
+      updateExerciseText();
 
-      statusBox.textContent =
+      messageBox.textContent =
         `המספר הראשון הוא ${firstNumber}. ` +
-        `התלמיד עומד על הבלטה ${firstNumber} ופניו אל המורה.`;
+        `התלמיד נמצא על הבלטה ${firstNumber}.`;
 
-      placeStudent(firstNumber, 0);
+      await sleep(1400);
 
-      await sleep(1700);
-
-      const rotation = operator === "+" ? 90 : -90;
+      const turnAmount = operator === "+" ? 90 : -90;
       const turnDirection =
         operator === "+" ? "ימינה" : "שמאלה";
 
-      statusBox.textContent =
-        `הסימן הוא ${operator}. ` +
+      currentRotation += turnAmount;
+
+      messageBox.textContent =
+        `מופיע הסימן ${operator}. ` +
         `התלמיד מסתובב 90 מעלות ${turnDirection}.`;
 
-      student.style.transform =
-        `translateX(-50%) rotate(${rotation}deg)`;
+      movingStudent.style.transform =
+        `translateX(-50%) rotate(${currentRotation}deg)`;
 
-      await sleep(1700);
-
-      const movementDirection =
-        secondNumber >= 0 ? "קדימה" : "אחורה";
+      await sleep(1500);
 
       const numberOfSteps = Math.abs(secondNumber);
+      const walkingDirection =
+        secondNumber >= 0 ? "קדימה" : "אחורה";
 
-      statusBox.textContent =
+      messageBox.textContent =
         `המספר השני הוא ${secondNumber}. ` +
-        `לכן התלמיד הולך ${numberOfSteps} צעדים ${movementDirection}.`;
+        `התלמיד הולך ${numberOfSteps} צעדים ${walkingDirection}.`;
 
       await sleep(1200);
 
-      const mathematicalDirection =
+      const directionOnNumberLine =
         operator === "+"
           ? Math.sign(secondNumber)
           : -Math.sign(secondNumber);
 
-      for (let step = 0; step < numberOfSteps; step += 1) {
-        markVisited(currentPosition);
+      for (
+        let step = 0;
+        step < numberOfSteps;
+        step += 1
+      ) {
+        const oldTile = getTile(currentPosition);
 
-        currentPosition += mathematicalDirection;
+        if (oldTile) {
+          oldTile.classList.remove("active");
+          oldTile.classList.add("visited");
+        }
 
-        const index = currentPosition - minimumTile;
-        const leftPosition = index * TILE_WIDTH + TILE_WIDTH / 2;
+        currentPosition += directionOnNumberLine;
 
-        student.style.left = `${leftPosition}px`;
+        movingStudent.style.left =
+          `${getStudentLeftPosition(currentPosition)}px`;
 
         const currentTile = getTile(currentPosition);
 
         if (currentTile) {
           currentTile.classList.add("active");
+
           currentTile.scrollIntoView({
             behavior: "smooth",
             inline: "center",
@@ -598,57 +788,106 @@
         }
 
         await sleep(650);
-
-        if (currentTile) {
-          currentTile.classList.remove("active");
-          currentTile.classList.add("visited");
-        }
       }
 
-      const finalTile = getTile(result);
-
-      if (finalTile) {
-        finalTile.classList.add("active");
-      }
-
-      statusBox.textContent =
-        `התלמיד הגיע לבלטה שעליה כתוב ${result}.`;
+      messageBox.textContent =
+        `התלמיד הגיע לבלטה שעליה כתוב ${currentPosition}.`;
 
       resultBox.textContent =
-        `${firstNumber} ${operator} ${formatNumber(secondNumber)} = ${result}`;
+        `${firstNumber} ${operator} ` +
+        `${formatSecondNumber(secondNumber)} = ${currentPosition}`;
 
+      runButton.disabled = false;
+      newExerciseButton.disabled = false;
       isRunning = false;
-      startButton.disabled = false;
     }
 
-    function resetSimulation() {
+    function prepareNewExercise() {
+      if (isRunning || !studentIsOnLine) {
+        return;
+      }
+
+      currentRotation = 0;
+
+      movingStudent.style.transform =
+        "translateX(-50%) rotate(0deg)";
+
+      clearTileHighlights();
+      highlightCurrentTile(currentPosition);
+
+      operatorInput.value = "+";
+      secondNumberInput.value = 3;
+
+      resultBox.textContent = "";
+
+      messageBox.textContent =
+        `התלמיד נמצא עכשיו על הבלטה ${currentPosition}. ` +
+        "אפשר לבחור את הפעולה הבאה.";
+
+      updateExerciseText();
+    }
+
+    function resetSimulator() {
       if (isRunning) {
         return;
       }
 
-      firstNumberInput.value = 0;
+      studentIsOnLine = false;
+      currentPosition = 0;
+      currentRotation = 0;
+
+      startingNumberInput.value = 0;
       operatorInput.value = "+";
       secondNumberInput.value = 3;
 
-      createNumberLine(0, 3);
-      placeStudent(0, 0);
+      startControls.classList.remove("hidden");
+      exerciseControls.classList.add("hidden");
 
-      updateExerciseText();
+      startingArea.style.opacity = "1";
+      waitingStudent.style.opacity = "1";
+      movingStudent.style.opacity = "0";
 
-      statusBox.textContent =
-        "התלמיד עומד על הבלטה של המספר הראשון ופניו אל המורה.";
-
+      exerciseBox.textContent = "";
       resultBox.textContent = "";
+
+      messageBox.textContent =
+        "המורה והתלמיד עומדים יחד מחוץ לציר המספרים.";
+
+      createNumberLine(0);
+      clearTileHighlights();
     }
 
-    firstNumberInput.addEventListener("input", updateExerciseText);
-    operatorInput.addEventListener("change", updateExerciseText);
-    secondNumberInput.addEventListener("input", updateExerciseText);
+    chooseTileButton.addEventListener(
+      "click",
+      chooseStartingTile
+    );
 
-    startButton.addEventListener("click", runSimulation);
-    resetButton.addEventListener("click", resetSimulation);
+    runButton.addEventListener(
+      "click",
+      runSimulation
+    );
 
-    resetSimulation();
+    newExerciseButton.addEventListener(
+      "click",
+      prepareNewExercise
+    );
+
+    resetButton.addEventListener(
+      "click",
+      resetSimulator
+    );
+
+    operatorInput.addEventListener(
+      "change",
+      updateExerciseText
+    );
+
+    secondNumberInput.addEventListener(
+      "input",
+      updateExerciseText
+    );
+
+    resetSimulator();
   </script>
 </body>
 </html>
