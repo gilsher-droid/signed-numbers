@@ -8,16 +8,18 @@
 
   <style>
     :root {
-      --dark-blue: #06283d;
+      --navy: #06283d;
       --blue: #0c4a6e;
-      --light-blue: #d9edf7;
-      --background: #eef4f7;
-      --tile: #ffffff;
-      --tile-border: #869aa5;
-      --active: #ffd166;
-      --visited: #cde8f5;
-      --zero: #d8f3dc;
-      --text: #16313f;
+      --light-bg: #eef4f7;
+      --board: #174c3a;
+      --board-frame: #8b623c;
+      --wall: #e8e1d2;
+      --floor-light: #d8c8a7;
+      --floor-dark: #b9a27b;
+      --tile-active: #ffd166;
+      --tile-visited: #b9e3f4;
+      --tile-zero: #d8f3dc;
+      --text: #17313e;
     }
 
     * {
@@ -29,18 +31,18 @@
       min-height: 100vh;
       font-family: Arial, sans-serif;
       color: var(--text);
-      background: var(--background);
+      background: var(--light-bg);
     }
 
     header {
-      padding: 20px;
+      padding: 18px 20px;
       text-align: center;
       color: white;
-      background: linear-gradient(135deg, var(--dark-blue), var(--blue));
+      background: linear-gradient(135deg, var(--navy), var(--blue));
     }
 
     header h1 {
-      margin: 0 0 6px;
+      margin: 0 0 5px;
       font-size: 30px;
     }
 
@@ -50,20 +52,8 @@
     }
 
     main {
-      width: min(1150px, 95%);
-      margin: 22px auto;
-    }
-
-    .message-box {
-      min-height: 76px;
-      margin-bottom: 16px;
-      padding: 18px;
-      border-radius: 16px;
-      background: white;
-      text-align: center;
-      font-size: 22px;
-      line-height: 1.5;
-      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
+      width: min(1200px, 96%);
+      margin: 20px auto;
     }
 
     .controls {
@@ -72,8 +62,8 @@
       justify-content: center;
       align-items: end;
       gap: 12px;
-      margin-bottom: 18px;
-      padding: 18px;
+      padding: 17px;
+      margin-bottom: 16px;
       border-radius: 16px;
       background: white;
       box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
@@ -83,7 +73,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      min-width: 140px;
+      min-width: 145px;
     }
 
     label {
@@ -102,7 +92,7 @@
     select {
       width: 100%;
       padding: 8px 10px;
-      border: 2px solid #becdd4;
+      border: 2px solid #becbd1;
       background: white;
     }
 
@@ -124,148 +114,393 @@
       cursor: not-allowed;
     }
 
-    .secondary-button {
+    .reset-button {
       background: #5d7079;
+    }
+
+    .message {
+      min-height: 68px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      border-radius: 15px;
+      background: white;
+      text-align: center;
+      font-size: 21px;
+      line-height: 1.5;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
     }
 
     .classroom {
       position: relative;
-      min-height: 410px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      padding: 30px 25px;
-      border: 8px solid #8e7656;
+      min-height: 690px;
+      overflow: hidden;
+      border: 8px solid #786048;
       border-radius: 18px;
-      background:
-        linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)),
-        repeating-linear-gradient(
-          90deg,
-          #d5c9af 0,
-          #d5c9af 78px,
-          #bcae90 79px,
-          #bcae90 81px
-        );
-      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.22);
+      background: var(--wall);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.18);
     }
 
-    .starting-area {
+    .front-wall {
+      position: relative;
+      height: 245px;
+      border-bottom: 8px solid #9f8c6e;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0.15),
+          rgba(255,255,255,0)
+        ),
+        var(--wall);
+    }
+
+    .board {
       position: absolute;
       top: 25px;
       left: 50%;
+      width: min(620px, 65%);
+      height: 175px;
+      padding: 18px;
+      transform: translateX(-50%);
+      border: 12px solid var(--board-frame);
+      border-radius: 6px;
+      color: white;
+      background:
+        radial-gradient(
+          circle at 20% 30%,
+          rgba(255,255,255,0.04),
+          transparent 35%
+        ),
+        var(--board);
+      box-shadow: 0 7px 14px rgba(0, 0, 0, 0.28);
+      text-align: center;
+    }
+
+    .board-title {
+      font-size: 18px;
+      opacity: 0.85;
+    }
+
+    .board-exercise {
+      margin-top: 25px;
+      font-size: 45px;
+      font-weight: bold;
+      direction: ltr;
+    }
+
+    .board-result {
+      min-height: 32px;
+      margin-top: 14px;
+      font-size: 25px;
+      color: #ffe89a;
+      direction: ltr;
+    }
+
+    .window {
+      position: absolute;
+      top: 38px;
+      right: 25px;
+      width: 120px;
+      height: 125px;
+      border: 8px solid white;
+      background:
+        linear-gradient(
+          90deg,
+          transparent 46%,
+          white 47%,
+          white 53%,
+          transparent 54%
+        ),
+        linear-gradient(
+          transparent 46%,
+          white 47%,
+          white 53%,
+          transparent 54%
+        ),
+        #a9d8ee;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+    }
+
+    .clock {
+      position: absolute;
+      top: 38px;
+      left: 35px;
+      width: 72px;
+      height: 72px;
+      border: 7px solid #344955;
+      border-radius: 50%;
+      background: white;
+    }
+
+    .clock::before,
+    .clock::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      width: 4px;
+      border-radius: 3px;
+      background: #344955;
+      transform-origin: bottom center;
+    }
+
+    .clock::before {
+      height: 22px;
+      transform: translateX(-50%) rotate(25deg);
+    }
+
+    .clock::after {
+      height: 16px;
+      transform: translateX(-50%) rotate(120deg);
+    }
+
+    .front-people {
+      position: absolute;
+      left: 50%;
+      bottom: -3px;
       display: flex;
       align-items: flex-end;
-      justify-content: center;
-      gap: 35px;
+      gap: 45px;
       transform: translateX(-50%);
-      z-index: 5;
+      z-index: 8;
     }
 
     .person {
       position: relative;
-      width: 52px;
-      height: 92px;
-      transition:
-        left 0.65s ease,
-        bottom 0.65s ease,
-        transform 0.65s ease,
-        opacity 0.4s ease;
+      width: 58px;
+      height: 112px;
     }
 
     .head {
-      width: 30px;
-      height: 30px;
+      position: relative;
+      width: 34px;
+      height: 34px;
       margin: 0 auto;
       border: 2px solid #263842;
       border-radius: 50%;
-      background: #f0bd91;
+      background: #efbd94;
+    }
+
+    .hair {
+      position: absolute;
+      top: -3px;
+      left: 3px;
+      width: 26px;
+      height: 13px;
+      border-radius: 16px 16px 4px 4px;
+      background: #3f3028;
     }
 
     .body {
       position: relative;
-      width: 38px;
-      height: 48px;
+      width: 42px;
+      height: 53px;
       margin: -1px auto 0;
       border: 2px solid #263842;
-      border-radius: 9px 9px 4px 4px;
+      border-radius: 10px 10px 4px 4px;
     }
 
     .teacher .body {
-      background: #384b55;
+      background: #455a64;
     }
 
-    .student .body {
-      background: #1565a7;
+    .active-student .body,
+    .moving-student .body {
+      background: #1769aa;
+    }
+
+    .legs {
+      position: relative;
+      width: 34px;
+      height: 25px;
+      margin: 0 auto;
+    }
+
+    .legs::before,
+    .legs::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 25px;
+      border-radius: 0 0 5px 5px;
+      background: #263842;
+    }
+
+    .legs::before {
+      left: 5px;
+    }
+
+    .legs::after {
+      right: 5px;
     }
 
     .person-label {
       position: absolute;
-      width: 90px;
-      bottom: -24px;
       left: 50%;
+      bottom: -23px;
+      width: 100px;
       transform: translateX(-50%);
       text-align: center;
+      font-size: 14px;
       font-weight: bold;
-      font-size: 15px;
     }
 
     .direction-arrow {
       position: absolute;
-      top: 12px;
+      top: 14px;
       left: 50%;
       transform: translateX(-50%);
       color: white;
-      font-size: 22px;
+      font-size: 21px;
+      line-height: 1;
     }
 
     .speech-bubble {
       position: absolute;
-      top: -10px;
-      right: 75px;
-      width: 230px;
-      padding: 12px;
-      border: 2px solid #344b57;
-      border-radius: 15px;
+      top: -66px;
+      right: 45px;
+      width: 210px;
+      padding: 10px;
+      border: 2px solid #344955;
+      border-radius: 14px;
       background: white;
       text-align: center;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
+      color: var(--text);
     }
 
     .speech-bubble::after {
       content: "";
       position: absolute;
-      bottom: -12px;
-      right: 35px;
-      width: 20px;
-      height: 20px;
-      border-right: 2px solid #344b57;
-      border-bottom: 2px solid #344b57;
+      right: 22px;
+      bottom: -10px;
+      width: 18px;
+      height: 18px;
+      border-right: 2px solid #344955;
+      border-bottom: 2px solid #344955;
       background: white;
       transform: rotate(45deg);
+    }
+
+    .floor {
+      position: relative;
+      min-height: 445px;
+      padding-top: 20px;
+      background:
+        linear-gradient(rgba(255,255,255,0.17), rgba(255,255,255,0.17)),
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 74px,
+          rgba(90,70,40,0.28) 75px,
+          rgba(90,70,40,0.28) 77px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          var(--floor-light) 0,
+          var(--floor-light) 88px,
+          var(--floor-dark) 89px,
+          var(--floor-dark) 92px
+        );
+    }
+
+    .student-desks {
+      position: absolute;
+      top: 22px;
+      right: 25px;
+      left: 25px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px 28px;
+      z-index: 3;
+    }
+
+    .desk-unit {
+      position: relative;
+      height: 105px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .seated-student {
+      position: absolute;
+      top: 0;
+      width: 46px;
+      height: 65px;
+    }
+
+    .seated-student .head {
+      width: 27px;
+      height: 27px;
+    }
+
+    .seated-student .body {
+      width: 34px;
+      height: 36px;
+      background: #6c8ebf;
+    }
+
+    .desk {
+      position: absolute;
+      bottom: 3px;
+      width: 100px;
+      height: 42px;
+      border: 3px solid #67482d;
+      border-radius: 5px;
+      background: #b47c49;
+      box-shadow: 0 5px 0 #67482d;
+    }
+
+    .desk::before,
+    .desk::after {
+      content: "";
+      position: absolute;
+      bottom: -22px;
+      width: 7px;
+      height: 22px;
+      background: #67482d;
+    }
+
+    .desk::before {
+      left: 12px;
+    }
+
+    .desk::after {
+      right: 12px;
+    }
+
+    .number-line-area {
+      position: absolute;
+      right: 0;
+      bottom: 8px;
+      left: 0;
+      overflow-x: auto;
+      padding: 105px 22px 8px;
+      z-index: 10;
     }
 
     .number-line {
       position: relative;
       display: flex;
       direction: ltr;
+      justify-content: center;
       width: max-content;
       min-width: 100%;
-      justify-content: center;
-      align-items: flex-end;
-      padding-top: 260px;
+      padding-top: 90px;
     }
 
     .tile {
       position: relative;
-      flex: 0 0 78px;
-      height: 95px;
+      flex: 0 0 76px;
+      height: 76px;
       display: flex;
-      align-items: flex-end;
       justify-content: center;
-      padding-bottom: 13px;
-      border: 2px solid var(--tile-border);
-      background: var(--tile);
-      font-size: 22px;
+      align-items: center;
+      border: 2px solid #77664e;
+      background: rgba(255, 255, 255, 0.84);
+      font-size: 21px;
       font-weight: bold;
       transition:
         background 0.3s ease,
@@ -273,82 +508,112 @@
     }
 
     .tile.zero {
-      background: var(--zero);
+      background: var(--tile-zero);
     }
 
     .tile.visited {
-      background: var(--visited);
+      background: var(--tile-visited);
     }
 
     .tile.active {
-      background: var(--active);
+      background: var(--tile-active);
       transform: translateY(-5px);
     }
 
     .moving-student {
       position: absolute;
-      bottom: 72px;
+      bottom: 62px;
       left: 50%;
-      width: 52px;
-      height: 92px;
+      width: 58px;
+      height: 112px;
+      opacity: 0;
       transform-origin: center center;
       transition:
         left 0.65s ease,
         transform 0.65s ease,
         opacity 0.4s ease;
-      opacity: 0;
-      z-index: 10;
+      z-index: 20;
     }
 
-    .exercise {
-      margin: 18px 0 10px;
-      text-align: center;
-      font-size: 34px;
-      font-weight: bold;
-      direction: ltr;
-    }
-
-    .result {
-      min-height: 60px;
+    .result-panel {
+      min-height: 55px;
       margin-top: 16px;
-      padding: 15px;
+      padding: 13px;
       border-radius: 14px;
       background: white;
       text-align: center;
-      font-size: 27px;
+      font-size: 25px;
       font-weight: bold;
+      direction: ltr;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
     }
 
-    .hidden {
-      display: none;
+    @media (max-width: 850px) {
+      .classroom {
+        min-height: 750px;
+      }
+
+      .board {
+        width: 65%;
+      }
+
+      .student-desks {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .window {
+        display: none;
+      }
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 600px) {
       header h1 {
         font-size: 24px;
-      }
-
-      .message-box {
-        font-size: 19px;
-      }
-
-      .speech-bubble {
-        width: 180px;
-        right: 55px;
-        font-size: 15px;
       }
 
       .controls {
         align-items: stretch;
       }
 
-      .field {
+      .field,
+      button {
         width: 100%;
       }
 
-      button {
-        width: 100%;
+      .classroom {
+        min-height: 820px;
+      }
+
+      .front-wall {
+        height: 270px;
+      }
+
+      .board {
+        top: 20px;
+        width: 76%;
+        height: 160px;
+      }
+
+      .board-exercise {
+        font-size: 34px;
+      }
+
+      .front-people {
+        gap: 22px;
+      }
+
+      .speech-bubble {
+        right: 20px;
+        width: 160px;
+        font-size: 14px;
+      }
+
+      .student-desks {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .number-line-area {
+        padding-top: 120px;
       }
     }
   </style>
@@ -361,29 +626,21 @@
   </header>
 
   <main>
-    <div id="messageBox" class="message-box">
-      המורה והתלמיד עומדים יחד מחוץ לציר המספרים.
-    </div>
-
-    <section id="startControls" class="controls">
+    <section class="controls">
       <div class="field">
-        <label for="startingNumber">מאיזו בלטה תרצה להתחיל?</label>
+        <label for="firstNumber">המספר הראשון</label>
         <input
-          id="startingNumber"
+          id="firstNumber"
           type="number"
           value="0"
-          min="-50"
-          max="50"
+          min="-30"
+          max="30"
           step="1"
         />
       </div>
 
-      <button id="chooseTileButton">בחר את הבלטה</button>
-    </section>
-
-    <section id="exerciseControls" class="controls hidden">
       <div class="field">
-        <label for="operator">סימן הפעולה</label>
+        <label for="operator">הפעולה</label>
         <select id="operator">
           <option value="+">+</option>
           <option value="-">−</option>
@@ -396,67 +653,153 @@
           id="secondNumber"
           type="number"
           value="3"
-          min="-50"
-          max="50"
+          min="-30"
+          max="30"
           step="1"
         />
       </div>
 
-      <button id="runButton">בצע את התרגיל</button>
-      <button id="newExerciseButton" class="secondary-button">
-        תרגיל חדש מאותה בלטה
-      </button>
-      <button id="resetButton" class="secondary-button">
-        התחל מחדש
-      </button>
+      <button id="startButton">הפעל את התרגיל</button>
+      <button id="resetButton" class="reset-button">איפוס</button>
     </section>
 
-    <div id="exercise" class="exercise"></div>
+    <div id="message" class="message">
+      המורה והתלמיד עומדים ליד הלוח. שאר התלמידים יושבים בכיתה.
+    </div>
 
-    <section id="classroom" class="classroom">
-      <div id="startingArea" class="starting-area">
-        <div class="person teacher">
-          <div class="speech-bubble">
-            מאיזו בלטה אתה רוצה להתחיל?
-          </div>
+    <section class="classroom">
+      <div class="front-wall">
+        <div class="clock"></div>
+        <div class="window"></div>
 
-          <div class="head"></div>
-
-          <div class="body"></div>
-
-          <div class="person-label">המורה</div>
+        <div class="board">
+          <div class="board-title">מספרים מכוונים</div>
+          <div id="boardExercise" class="board-exercise">0 + 3</div>
+          <div id="boardResult" class="board-result"></div>
         </div>
 
-        <div id="waitingStudent" class="person student">
-          <div class="head"></div>
+        <div id="frontPeople" class="front-people">
+          <div class="person teacher">
+            <div id="speechBubble" class="speech-bubble">
+              בוא נבצע את התרגיל שמופיע על הלוח.
+            </div>
 
-          <div class="body">
-            <div class="direction-arrow">↑</div>
+            <div class="head">
+              <div class="hair"></div>
+            </div>
+
+            <div class="body"></div>
+            <div class="legs"></div>
+            <div class="person-label">המורה</div>
           </div>
 
-          <div class="person-label">התלמיד</div>
+          <div id="standingStudent" class="person active-student">
+            <div class="head">
+              <div class="hair"></div>
+            </div>
+
+            <div class="body">
+              <div class="direction-arrow">↑</div>
+            </div>
+
+            <div class="legs"></div>
+            <div class="person-label">התלמיד</div>
+          </div>
         </div>
       </div>
 
-      <div id="numberLine" class="number-line">
-        <div id="movingStudent" class="moving-student student">
-          <div class="head"></div>
-
-          <div class="body">
-            <div class="direction-arrow">↑</div>
+      <div class="floor">
+        <div class="student-desks">
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
           </div>
 
-          <div class="person-label">התלמיד</div>
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
+          </div>
+
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
+          </div>
+
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
+          </div>
+
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
+          </div>
+
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
+          </div>
+
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
+          </div>
+
+          <div class="desk-unit">
+            <div class="seated-student">
+              <div class="head"><div class="hair"></div></div>
+              <div class="body"></div>
+            </div>
+            <div class="desk"></div>
+          </div>
+        </div>
+
+        <div class="number-line-area">
+          <div id="numberLine" class="number-line">
+            <div id="movingStudent" class="moving-student">
+              <div class="head">
+                <div class="hair"></div>
+              </div>
+
+              <div class="body">
+                <div class="direction-arrow">↑</div>
+              </div>
+
+              <div class="legs"></div>
+              <div class="person-label">התלמיד</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <div id="result" class="result"></div>
+    <div id="resultPanel" class="result-panel"></div>
   </main>
 
   <script>
-    const startingNumberInput =
-      document.getElementById("startingNumber");
+    const firstNumberInput =
+      document.getElementById("firstNumber");
 
     const operatorInput =
       document.getElementById("operator");
@@ -464,46 +807,37 @@
     const secondNumberInput =
       document.getElementById("secondNumber");
 
-    const chooseTileButton =
-      document.getElementById("chooseTileButton");
-
-    const runButton =
-      document.getElementById("runButton");
-
-    const newExerciseButton =
-      document.getElementById("newExerciseButton");
+    const startButton =
+      document.getElementById("startButton");
 
     const resetButton =
       document.getElementById("resetButton");
 
-    const startControls =
-      document.getElementById("startControls");
-
-    const exerciseControls =
-      document.getElementById("exerciseControls");
-
     const messageBox =
-      document.getElementById("messageBox");
+      document.getElementById("message");
 
-    const exerciseBox =
-      document.getElementById("exercise");
+    const boardExercise =
+      document.getElementById("boardExercise");
 
-    const resultBox =
-      document.getElementById("result");
+    const boardResult =
+      document.getElementById("boardResult");
 
-    const numberLine =
-      document.getElementById("numberLine");
+    const speechBubble =
+      document.getElementById("speechBubble");
 
-    const startingArea =
-      document.getElementById("startingArea");
-
-    const waitingStudent =
-      document.getElementById("waitingStudent");
+    const standingStudent =
+      document.getElementById("standingStudent");
 
     const movingStudent =
       document.getElementById("movingStudent");
 
-    const TILE_WIDTH = 78;
+    const numberLine =
+      document.getElementById("numberLine");
+
+    const resultPanel =
+      document.getElementById("resultPanel");
+
+    const TILE_WIDTH = 76;
 
     let tiles = [];
     let minimumTile = -10;
@@ -511,12 +845,19 @@
     let currentPosition = 0;
     let currentRotation = 0;
     let isRunning = false;
-    let studentIsOnLine = false;
 
     function sleep(milliseconds) {
       return new Promise(resolve => {
         setTimeout(resolve, milliseconds);
       });
+    }
+
+    function isValidInteger(number) {
+      return Number.isInteger(number) && Math.abs(number) <= 30;
+    }
+
+    function formatNumber(number) {
+      return number < 0 ? `(${number})` : `${number}`;
     }
 
     function calculateResult(firstNumber, operator, secondNumber) {
@@ -525,11 +866,16 @@
         : firstNumber - secondNumber;
     }
 
-    function formatSecondNumber(number) {
-      return number < 0 ? `(${number})` : `${number}`;
+    function updateBoardExercise() {
+      const firstNumber = Number(firstNumberInput.value);
+      const operator = operatorInput.value;
+      const secondNumber = Number(secondNumberInput.value);
+
+      boardExercise.textContent =
+        `${firstNumber} ${operator} ${formatNumber(secondNumber)}`;
     }
 
-    function createNumberLine(firstNumber, finalNumber = firstNumber) {
+    function createNumberLine(firstNumber, finalNumber) {
       minimumTile = Math.min(
         -10,
         firstNumber - 4,
@@ -576,19 +922,18 @@
       });
     }
 
-    function getStudentLeftPosition(number) {
+    function getStudentLeft(number) {
       const tileIndex = number - minimumTile;
-
       return tileIndex * TILE_WIDTH + TILE_WIDTH / 2;
     }
 
-    function clearTileHighlights() {
+    function clearHighlights() {
       tiles.forEach(tile => {
         tile.classList.remove("active", "visited");
       });
     }
 
-    function highlightCurrentTile(number) {
+    function highlightTile(number) {
       const tile = getTile(number);
 
       if (!tile) {
@@ -609,95 +954,30 @@
       currentRotation = 0;
 
       movingStudent.style.left =
-        `${getStudentLeftPosition(number)}px`;
+        `${getStudentLeft(number)}px`;
 
       movingStudent.style.transform =
         "translateX(-50%) rotate(0deg)";
 
-      movingStudent.style.opacity = "1";
-
-      waitingStudent.style.opacity = "0";
-
-      clearTileHighlights();
-      highlightCurrentTile(number);
+      clearHighlights();
+      highlightTile(number);
     }
 
-    function updateExerciseText() {
-      if (!studentIsOnLine) {
-        exerciseBox.textContent = "";
-        return;
-      }
-
-      const operator = operatorInput.value;
-      const secondNumber = Number(secondNumberInput.value);
-
-      exerciseBox.textContent =
-        `${currentPosition} ${operator} ${formatSecondNumber(secondNumber)}`;
-    }
-
-    function validateInteger(value) {
-      return Number.isInteger(value) && Math.abs(value) <= 50;
-    }
-
-    async function chooseStartingTile() {
+    async function runSimulation() {
       if (isRunning) {
         return;
       }
 
-      const startingNumber =
-        Number(startingNumberInput.value);
-
-      if (!validateInteger(startingNumber)) {
-        messageBox.textContent =
-          "יש לבחור מספר שלם בין מינוס 50 ל־50.";
-        return;
-      }
-
-      isRunning = true;
-      chooseTileButton.disabled = true;
-
-      createNumberLine(startingNumber);
-
-      messageBox.textContent =
-        `בחרת להתחיל מהבלטה ${startingNumber}. ` +
-        "התלמיד ניגש אל הבלטה.";
-
-      await sleep(900);
-
-      placeStudentOnTile(startingNumber);
-
-      await sleep(700);
-
-      studentIsOnLine = true;
-
-      messageBox.textContent =
-        `התלמיד עומד על הבלטה ${startingNumber} ` +
-        "ופניו אל המורה.";
-
-      startingArea.style.opacity = "0.45";
-
-      startControls.classList.add("hidden");
-      exerciseControls.classList.remove("hidden");
-
-      resultBox.textContent = "";
-      updateExerciseText();
-
-      chooseTileButton.disabled = false;
-      isRunning = false;
-    }
-
-    async function runSimulation() {
-      if (isRunning || !studentIsOnLine) {
-        return;
-      }
-
-      const firstNumber = currentPosition;
+      const firstNumber = Number(firstNumberInput.value);
       const operator = operatorInput.value;
       const secondNumber = Number(secondNumberInput.value);
 
-      if (!validateInteger(secondNumber)) {
+      if (
+        !isValidInteger(firstNumber) ||
+        !isValidInteger(secondNumber)
+      ) {
         messageBox.textContent =
-          "יש להזין מספר שני שלם בין מינוס 50 ל־50.";
+          "יש להזין מספרים שלמים בין מינוס 30 ל־30.";
         return;
       }
 
@@ -707,56 +987,83 @@
         secondNumber
       );
 
-      if (Math.abs(result) > 100) {
+      if (Math.abs(result) > 60) {
         messageBox.textContent =
-          "התוצאה גדולה מדי עבור הציר הנוכחי.";
+          "התוצאה רחוקה מדי עבור רצפת הכיתה.";
         return;
       }
 
       isRunning = true;
-      runButton.disabled = true;
-      newExerciseButton.disabled = true;
-      resultBox.textContent = "";
+      startButton.disabled = true;
 
+      boardResult.textContent = "";
+      resultPanel.textContent = "";
+
+      updateBoardExercise();
       createNumberLine(firstNumber, result);
-      placeStudentOnTile(firstNumber);
-      updateExerciseText();
 
       messageBox.textContent =
-        `המספר הראשון הוא ${firstNumber}. ` +
-        `התלמיד נמצא על הבלטה ${firstNumber}.`;
+        `התרגיל על הלוח הוא ${firstNumber} ${operator} ${formatNumber(secondNumber)}.`;
 
-      await sleep(1400);
+      speechBubble.textContent =
+        `המספר הראשון הוא ${firstNumber}. לך לעמוד על הבלטה ${firstNumber}.`;
+
+      await sleep(1500);
+
+      standingStudent.style.opacity = "0";
+
+      placeStudentOnTile(firstNumber);
+      movingStudent.style.opacity = "1";
+
+      messageBox.textContent =
+        `התלמיד הולך אל הבלטה ${firstNumber}.`;
+
+      await sleep(1500);
+
+      speechBubble.textContent =
+        `עכשיו אתה עומד על ${firstNumber}.`;
+
+      await sleep(900);
 
       const turnAmount = operator === "+" ? 90 : -90;
+
       const turnDirection =
         operator === "+" ? "ימינה" : "שמאלה";
 
       currentRotation += turnAmount;
 
+      speechBubble.textContent =
+        `הסימן ${operator} אומר להסתובב 90 מעלות ${turnDirection}.`;
+
       messageBox.textContent =
-        `מופיע הסימן ${operator}. ` +
         `התלמיד מסתובב 90 מעלות ${turnDirection}.`;
 
       movingStudent.style.transform =
         `translateX(-50%) rotate(${currentRotation}deg)`;
 
-      await sleep(1500);
+      await sleep(1600);
 
       const numberOfSteps = Math.abs(secondNumber);
+
       const walkingDirection =
         secondNumber >= 0 ? "קדימה" : "אחורה";
 
+      speechBubble.textContent =
+        `המספר השני הוא ${secondNumber}. לך ${numberOfSteps} צעדים ${walkingDirection}.`;
+
       messageBox.textContent =
-        `המספר השני הוא ${secondNumber}. ` +
         `התלמיד הולך ${numberOfSteps} צעדים ${walkingDirection}.`;
 
-      await sleep(1200);
+      await sleep(1300);
 
-      const directionOnNumberLine =
+      const directionOnLine =
         operator === "+"
           ? Math.sign(secondNumber)
           : -Math.sign(secondNumber);
+
+      if (numberOfSteps === 0) {
+        await sleep(700);
+      }
 
       for (
         let step = 0;
@@ -770,10 +1077,10 @@
           oldTile.classList.add("visited");
         }
 
-        currentPosition += directionOnNumberLine;
+        currentPosition += directionOnLine;
 
         movingStudent.style.left =
-          `${getStudentLeftPosition(currentPosition)}px`;
+          `${getStudentLeft(currentPosition)}px`;
 
         const currentTile = getTile(currentPosition);
 
@@ -790,41 +1097,25 @@
         await sleep(650);
       }
 
+      speechBubble.textContent =
+        `על איזו בלטה אתה עומד עכשיו?`;
+
       messageBox.textContent =
-        `התלמיד הגיע לבלטה שעליה כתוב ${currentPosition}.`;
+        `התלמיד הגיע לבלטה ${currentPosition}.`;
 
-      resultBox.textContent =
-        `${firstNumber} ${operator} ` +
-        `${formatSecondNumber(secondNumber)} = ${currentPosition}`;
+      await sleep(1300);
 
-      runButton.disabled = false;
-      newExerciseButton.disabled = false;
+      boardResult.textContent =
+        `${firstNumber} ${operator} ${formatNumber(secondNumber)} = ${currentPosition}`;
+
+      resultPanel.textContent =
+        `${firstNumber} ${operator} ${formatNumber(secondNumber)} = ${currentPosition}`;
+
+      speechBubble.textContent =
+        `נכון. התשובה היא ${currentPosition}.`;
+
       isRunning = false;
-    }
-
-    function prepareNewExercise() {
-      if (isRunning || !studentIsOnLine) {
-        return;
-      }
-
-      currentRotation = 0;
-
-      movingStudent.style.transform =
-        "translateX(-50%) rotate(0deg)";
-
-      clearTileHighlights();
-      highlightCurrentTile(currentPosition);
-
-      operatorInput.value = "+";
-      secondNumberInput.value = 3;
-
-      resultBox.textContent = "";
-
-      messageBox.textContent =
-        `התלמיד נמצא עכשיו על הבלטה ${currentPosition}. ` +
-        "אפשר לבחור את הפעולה הבאה.";
-
-      updateExerciseText();
+      startButton.disabled = false;
     }
 
     function resetSimulator() {
@@ -832,59 +1123,53 @@
         return;
       }
 
-      studentIsOnLine = false;
-      currentPosition = 0;
-      currentRotation = 0;
-
-      startingNumberInput.value = 0;
+      firstNumberInput.value = 0;
       operatorInput.value = "+";
       secondNumberInput.value = 3;
 
-      startControls.classList.remove("hidden");
-      exerciseControls.classList.add("hidden");
+      currentPosition = 0;
+      currentRotation = 0;
 
-      startingArea.style.opacity = "1";
-      waitingStudent.style.opacity = "1";
+      standingStudent.style.opacity = "1";
       movingStudent.style.opacity = "0";
 
-      exerciseBox.textContent = "";
-      resultBox.textContent = "";
+      boardResult.textContent = "";
+      resultPanel.textContent = "";
 
       messageBox.textContent =
-        "המורה והתלמיד עומדים יחד מחוץ לציר המספרים.";
+        "המורה והתלמיד עומדים ליד הלוח. שאר התלמידים יושבים בכיתה.";
 
-      createNumberLine(0);
-      clearTileHighlights();
+      speechBubble.textContent =
+        "בוא נבצע את התרגיל שמופיע על הלוח.";
+
+      updateBoardExercise();
+      createNumberLine(0, 3);
+      clearHighlights();
     }
 
-    chooseTileButton.addEventListener(
-      "click",
-      chooseStartingTile
+    firstNumberInput.addEventListener(
+      "input",
+      updateBoardExercise
     );
 
-    runButton.addEventListener(
+    operatorInput.addEventListener(
+      "change",
+      updateBoardExercise
+    );
+
+    secondNumberInput.addEventListener(
+      "input",
+      updateBoardExercise
+    );
+
+    startButton.addEventListener(
       "click",
       runSimulation
-    );
-
-    newExerciseButton.addEventListener(
-      "click",
-      prepareNewExercise
     );
 
     resetButton.addEventListener(
       "click",
       resetSimulator
-    );
-
-    operatorInput.addEventListener(
-      "change",
-      updateExerciseText
-    );
-
-    secondNumberInput.addEventListener(
-      "input",
-      updateExerciseText
     );
 
     resetSimulator();
