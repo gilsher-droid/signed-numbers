@@ -32,6 +32,7 @@ html {
 }
 
 body {
+  display: flow-root;
   margin: 0;
   min-height: 100vh;
   font-family:
@@ -684,6 +685,7 @@ html[dir="ltr"] .speech-bubble::after {
   overflow-x: auto;
   padding: 105px 22px 8px;
   z-index: 10;
+  direction: ltr;
   scrollbar-color: var(--primary-light) rgba(255, 255, 255, 0.5);
 }
 
@@ -749,6 +751,183 @@ html[dir="ltr"] .speech-bubble::after {
   font-size: clamp(1.25rem, 3vw, 1.6rem);
   font-weight: 800;
   direction: ltr;
+}
+
+@media (min-width: 901px) and (min-height: 700px) {
+  #app {
+    display: grid;
+    height: calc(100dvh - 28px);
+    margin: 14px auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .app-header {
+    margin-bottom: 0;
+    padding: 10px 14px;
+    gap: 16px;
+  }
+
+  .brand-product-lockup {
+    gap: 14px;
+  }
+
+  .fundamatics-brand {
+    width: min(205px, 28vw);
+    padding-block: 8px 6px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .fundamatics-home-link {
+    padding: 8px 14px;
+  }
+
+  main {
+    min-height: 0;
+    display: grid;
+    grid-template:
+      "controls classroom" auto
+      "message classroom" minmax(0, 1fr)
+      "result classroom" auto
+      / minmax(280px, 330px) minmax(0, 1fr);
+    gap: 14px 16px;
+  }
+
+  .controls {
+    grid-area: controls;
+    display: grid;
+    grid-template:
+      "first second" auto
+      "operator operator" auto
+      "start reset" auto
+      / minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin: 0;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .field {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    gap: 3px;
+  }
+
+  .field-first {
+    grid-area: first;
+  }
+
+  .field-operator {
+    grid-area: operator;
+  }
+
+  .field-second {
+    grid-area: second;
+  }
+
+  .controls input,
+  .controls select,
+  .controls button {
+    min-height: 42px;
+  }
+
+  #startButton {
+    grid-area: start;
+    padding-inline: 10px;
+  }
+
+  #resetButton {
+    grid-area: reset;
+    padding-inline: 10px;
+  }
+
+  .message {
+    grid-area: message;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    overflow: auto;
+    margin: 0;
+    padding: 16px;
+  }
+
+  .classroom {
+    grid-area: classroom;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .front-wall {
+    height: 32%;
+    min-height: 185px;
+  }
+
+  .floor {
+    height: 68%;
+    min-height: 0;
+  }
+
+  .board {
+    top: 18px;
+    height: min(165px, calc(100% - 42px));
+    padding: 12px;
+  }
+
+  .board-exercise {
+    margin-top: 12px;
+  }
+
+  .front-people {
+    gap: 34px;
+  }
+
+  .speech-bubble {
+    top: -62px;
+    width: 205px;
+    padding: 8px;
+    font-size: 0.85rem;
+    line-height: 1.35;
+  }
+
+  .student-desks {
+    top: 16px;
+    gap: 12px 22px;
+  }
+
+  .desk-unit {
+    height: 92px;
+  }
+
+  .number-line-area {
+    padding-top: clamp(82px, 14vh, 108px);
+  }
+
+  .result-panel {
+    grid-area: result;
+    min-height: 54px;
+    margin: 0;
+    padding: 8px;
+    border-radius: 16px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1120px) {
+  .window {
+    display: none;
+  }
+
+  .board {
+    width: 76%;
+  }
+
+  main {
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 900px) {

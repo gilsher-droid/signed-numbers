@@ -12,6 +12,7 @@ const speechBubble = document.getElementById("speechBubble");
 const standingStudent = document.getElementById("standingStudent");
 const movingStudent = document.getElementById("movingStudent");
 const numberLine = document.getElementById("numberLine");
+const numberLineArea = document.querySelector(".number-line-area");
 const resultPanel = document.getElementById("resultPanel");
 const studentDesks = document.getElementById("studentDesks");
 const languageButtons = Array.from(
@@ -172,6 +173,17 @@ function createNumberLine(firstNumber, finalNumber) {
   }
 
   numberLine.appendChild(movingStudent);
+
+  window.requestAnimationFrame(() => {
+    const startingTile = getTile(firstNumber);
+
+    if (startingTile && numberLineArea) {
+      numberLineArea.scrollLeft =
+        startingTile.offsetLeft +
+        startingTile.offsetWidth / 2 -
+        numberLineArea.clientWidth / 2;
+    }
+  });
 }
 
 function getTile(number) {
