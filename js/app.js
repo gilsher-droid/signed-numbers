@@ -19,7 +19,7 @@ const languageButtons = Array.from(
   document.querySelectorAll(".language-option")
 );
 
-const TILE_WIDTH = 76;
+const TILE_WIDTH = 54;
 const leftToRightIsolate = value => `\u2066${value}\u2069`;
 
 let tiles = [];

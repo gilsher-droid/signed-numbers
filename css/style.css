@@ -335,6 +335,8 @@ button:disabled {
 
 .classroom {
   position: relative;
+  display: grid;
+  grid-template-rows: 245px auto minmax(320px, 1fr);
   min-height: 690px;
   overflow: hidden;
   border: 8px solid #786048;
@@ -356,14 +358,14 @@ button:disabled {
 
 .board {
   position: absolute;
-  top: 25px;
+  top: 18px;
   left: 50%;
-  width: min(620px, 65%);
-  height: 175px;
-  padding: 18px;
+  width: min(434px, 46%);
+  height: 123px;
+  padding: 12px;
   transform: translateX(-50%);
-  border: 12px solid var(--board-frame);
-  border-radius: 6px;
+  border: 8px solid var(--board-frame);
+  border-radius: 5px;
   color: white;
   background:
     radial-gradient(
@@ -377,32 +379,32 @@ button:disabled {
 }
 
 .board-title {
-  font-size: 1.05rem;
+  font-size: 0.8rem;
   opacity: 0.85;
 }
 
 .board-exercise {
-  margin-top: 20px;
-  font-size: clamp(2rem, 5vw, 2.8rem);
+  margin-top: 8px;
+  font-size: clamp(1.45rem, 3.5vw, 2rem);
   font-weight: 700;
   direction: ltr;
 }
 
 .board-result {
-  min-height: 32px;
-  margin-top: 8px;
+  min-height: 22px;
+  margin-top: 4px;
   color: #ffe89a;
-  font-size: 1.5rem;
+  font-size: 1.05rem;
   direction: ltr;
 }
 
 .window {
   position: absolute;
-  top: 38px;
-  inset-inline-end: 25px;
-  width: 120px;
-  height: 125px;
-  border: 8px solid white;
+  top: 28px;
+  inset-inline-end: 22px;
+  width: 84px;
+  height: 88px;
+  border: 6px solid white;
   background:
     linear-gradient(
       90deg,
@@ -423,11 +425,11 @@ button:disabled {
 
 .clock {
   position: absolute;
-  top: 38px;
-  inset-inline-start: 35px;
-  width: 72px;
-  height: 72px;
-  border: 7px solid #344955;
+  top: 28px;
+  inset-inline-start: 28px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #344955;
   border-radius: 50%;
   background: white;
 }
@@ -438,19 +440,19 @@ button:disabled {
   position: absolute;
   left: 50%;
   bottom: 50%;
-  width: 4px;
+  width: 3px;
   border-radius: 3px;
   background: #344955;
   transform-origin: bottom center;
 }
 
 .clock::before {
-  height: 22px;
+  height: 15px;
   transform: translateX(-50%) rotate(25deg);
 }
 
 .clock::after {
-  height: 16px;
+  height: 11px;
   transform: translateX(-50%) rotate(120deg);
 }
 
@@ -462,7 +464,7 @@ button:disabled {
   align-items: flex-end;
   gap: 45px;
   transform: translateX(-50%);
-  z-index: 8;
+  z-index: 20;
 }
 
 .person {
@@ -557,6 +559,69 @@ button:disabled {
   line-height: 1;
 }
 
+.front-people .person {
+  width: 41px;
+  height: 78px;
+}
+
+.front-people .head,
+.moving-student .head {
+  width: 24px;
+  height: 24px;
+}
+
+.front-people .hair,
+.moving-student .hair {
+  top: -2px;
+  left: 2px;
+  width: 18px;
+  height: 9px;
+}
+
+.front-people .body,
+.moving-student .body {
+  width: 29px;
+  height: 37px;
+  border-radius: 7px 7px 3px 3px;
+}
+
+.front-people .legs,
+.moving-student .legs {
+  width: 24px;
+  height: 18px;
+}
+
+.front-people .legs::before,
+.front-people .legs::after,
+.moving-student .legs::before,
+.moving-student .legs::after {
+  width: 6px;
+  height: 18px;
+}
+
+.front-people .legs::before,
+.moving-student .legs::before {
+  left: 3px;
+}
+
+.front-people .legs::after,
+.moving-student .legs::after {
+  right: 3px;
+}
+
+.front-people .direction-arrow,
+.moving-student .direction-arrow {
+  top: 10px;
+  font-size: 0.95rem;
+}
+
+.front-people .person-label,
+.moving-student .person-label {
+  bottom: -18px;
+  width: 90px;
+  font-size: 0.75rem;
+}
+
 .speech-bubble {
   position: absolute;
   top: -72px;
@@ -591,8 +656,8 @@ html[dir="ltr"] .speech-bubble::after {
 
 .floor {
   position: relative;
-  min-height: 445px;
-  padding-top: 20px;
+  min-height: 320px;
+  padding-top: 14px;
   background:
     linear-gradient(rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.17)),
     repeating-linear-gradient(
@@ -613,18 +678,18 @@ html[dir="ltr"] .speech-bubble::after {
 
 .student-desks {
   position: absolute;
-  top: 22px;
+  top: 14px;
   right: 25px;
   left: 25px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px 28px;
+  gap: 14px 20px;
   z-index: 3;
 }
 
 .desk-unit {
   position: relative;
-  height: 105px;
+  height: 74px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -633,57 +698,67 @@ html[dir="ltr"] .speech-bubble::after {
 .seated-student {
   position: absolute;
   top: 0;
-  width: 46px;
-  height: 65px;
+  width: 32px;
+  height: 46px;
 }
 
 .seated-student .head {
-  width: 27px;
-  height: 27px;
+  width: 19px;
+  height: 19px;
+}
+
+.seated-student .hair {
+  top: -2px;
+  left: 2px;
+  width: 18px;
+  height: 9px;
 }
 
 .seated-student .body {
-  width: 34px;
-  height: 36px;
+  width: 24px;
+  height: 25px;
   background: #6c8ebf;
 }
 
 .desk {
   position: absolute;
-  bottom: 3px;
-  width: 100px;
-  height: 42px;
-  border: 3px solid #67482d;
-  border-radius: 5px;
+  bottom: 2px;
+  width: 70px;
+  height: 29px;
+  border: 2px solid #67482d;
+  border-radius: 4px;
   background: #b47c49;
-  box-shadow: 0 5px 0 #67482d;
+  box-shadow: 0 4px 0 #67482d;
 }
 
 .desk::before,
 .desk::after {
   content: "";
   position: absolute;
-  bottom: -22px;
-  width: 7px;
-  height: 22px;
+  bottom: -15px;
+  width: 5px;
+  height: 15px;
   background: #67482d;
 }
 
 .desk::before {
-  left: 12px;
+  left: 8px;
 }
 
 .desk::after {
-  right: 12px;
+  right: 8px;
 }
 
 .number-line-area {
-  position: absolute;
-  right: 0;
-  bottom: 8px;
-  left: 0;
+  position: relative;
+  min-width: 0;
   overflow-x: auto;
-  padding: 105px 22px 8px;
+  padding: 70px 22px 8px;
+  border-top: 4px solid #9f8c6e;
+  border-bottom: 4px solid #9f8c6e;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
+    var(--floor-light);
   z-index: 10;
   direction: ltr;
   scrollbar-color: var(--primary-light) rgba(255, 255, 255, 0.5);
@@ -695,20 +770,20 @@ html[dir="ltr"] .speech-bubble::after {
   width: max-content;
   min-width: 100%;
   justify-content: center;
-  padding-top: 90px;
+  padding-top: 50px;
   direction: ltr;
 }
 
 .tile {
   position: relative;
-  flex: 0 0 76px;
-  height: 76px;
+  flex: 0 0 54px;
+  height: 54px;
   display: flex;
   justify-content: center;
   align-items: center;
   border: 2px solid #77664e;
   background: rgba(255, 255, 255, 0.9);
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 700;
   transition:
     background 0.3s ease,
@@ -730,10 +805,10 @@ html[dir="ltr"] .speech-bubble::after {
 
 .moving-student {
   position: absolute;
-  bottom: 62px;
+  bottom: 42px;
   left: 50%;
-  width: 58px;
-  height: 112px;
+  width: 41px;
+  height: 78px;
   opacity: 0;
   transform-origin: center center;
   transition:
@@ -860,22 +935,21 @@ html[dir="ltr"] .speech-bubble::after {
     width: 100%;
     height: 100%;
     min-height: 0;
+    grid-template-rows: 32% 190px minmax(0, 1fr);
   }
 
   .front-wall {
-    height: 32%;
-    min-height: 185px;
+    height: auto;
+    min-height: 0;
   }
 
   .floor {
-    height: 68%;
+    height: auto;
     min-height: 0;
   }
 
   .board {
-    top: 18px;
-    height: min(165px, calc(100% - 42px));
-    padding: 12px;
+    height: min(123px, calc(100% - 34px));
   }
 
   .board-exercise {
@@ -895,16 +969,16 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .student-desks {
-    top: 16px;
-    gap: 12px 22px;
+    top: 12px;
+    gap: 10px 18px;
   }
 
   .desk-unit {
-    height: 92px;
+    height: 74px;
   }
 
   .number-line-area {
-    padding-top: clamp(82px, 14vh, 108px);
+    padding-top: 70px;
   }
 
   .result-panel {
@@ -922,7 +996,7 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .board {
-    width: 76%;
+    width: min(434px, 54%);
   }
 
   main {
@@ -945,7 +1019,7 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .board {
-    width: 65%;
+    width: min(434px, 54%);
   }
 
   .student-desks {
@@ -1014,7 +1088,8 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .classroom {
-    min-height: 820px;
+    grid-template-rows: 270px auto minmax(320px, 1fr);
+    min-height: 840px;
   }
 
   .front-wall {
@@ -1023,8 +1098,8 @@ html[dir="ltr"] .speech-bubble::after {
 
   .board {
     top: 20px;
-    width: 82%;
-    height: 160px;
+    width: 58%;
+    height: 112px;
   }
 
   .front-people {
@@ -1042,7 +1117,7 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .number-line-area {
-    padding-top: 120px;
+    padding-top: 70px;
   }
 }
 
