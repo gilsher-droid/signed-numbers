@@ -459,7 +459,7 @@ button:disabled {
 .front-people {
   position: absolute;
   left: 50%;
-  bottom: -3px;
+  bottom: -12px;
   display: flex;
   align-items: flex-end;
   gap: 45px;
@@ -624,9 +624,9 @@ button:disabled {
 
 .speech-bubble {
   position: absolute;
-  top: -72px;
-  inset-inline-start: 45px;
-  width: 225px;
+  inset-inline-end: 16px;
+  bottom: 18px;
+  width: clamp(160px, 22%, 195px);
   padding: 10px;
   border: 2px solid #344955;
   border-radius: 14px;
@@ -640,18 +640,19 @@ button:disabled {
 .speech-bubble::after {
   content: "";
   position: absolute;
-  inset-inline-start: 22px;
-  bottom: -10px;
+  inset-inline-start: -10px;
+  inset-inline-end: auto;
+  top: 50%;
   width: 18px;
   height: 18px;
   border-inline-start: 2px solid #344955;
   border-bottom: 2px solid #344955;
   background: white;
-  transform: rotate(-45deg);
+  transform: translateY(-50%) rotate(-45deg);
 }
 
 html[dir="ltr"] .speech-bubble::after {
-  transform: rotate(45deg);
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .floor {
@@ -752,8 +753,11 @@ html[dir="ltr"] .speech-bubble::after {
 .number-line-area {
   position: relative;
   min-width: 0;
+  display: flex;
+  align-items: center;
   overflow-x: auto;
-  padding: 70px 22px 8px;
+  overflow-y: hidden;
+  padding: 0 18px;
   border-top: 4px solid #9f8c6e;
   border-bottom: 4px solid #9f8c6e;
   background:
@@ -761,7 +765,11 @@ html[dir="ltr"] .speech-bubble::after {
     var(--floor-light);
   z-index: 10;
   direction: ltr;
-  scrollbar-color: var(--primary-light) rgba(255, 255, 255, 0.5);
+  scrollbar-width: none;
+}
+
+.number-line-area::-webkit-scrollbar {
+  display: none;
 }
 
 .number-line {
@@ -770,13 +778,14 @@ html[dir="ltr"] .speech-bubble::after {
   width: max-content;
   min-width: 100%;
   justify-content: center;
-  padding-top: 50px;
+  padding-top: 46px;
   direction: ltr;
 }
 
 .tile {
   position: relative;
-  flex: 0 0 54px;
+  flex: 1 0 36px;
+  max-width: 54px;
   height: 54px;
   display: flex;
   justify-content: center;
@@ -875,10 +884,9 @@ html[dir="ltr"] .speech-bubble::after {
     grid-area: controls;
     display: grid;
     grid-template:
-      "first second" auto
-      "operator operator" auto
-      "start reset" auto
-      / minmax(0, 1fr) minmax(0, 1fr);
+      "first first operator operator second second" auto
+      "start start start reset reset reset" auto
+      / repeat(6, minmax(0, 1fr));
     gap: 10px;
     margin: 0;
     padding: 14px;
@@ -935,7 +943,7 @@ html[dir="ltr"] .speech-bubble::after {
     width: 100%;
     height: 100%;
     min-height: 0;
-    grid-template-rows: 32% 190px minmax(0, 1fr);
+    grid-template-rows: 230px 150px minmax(0, 1fr);
   }
 
   .front-wall {
@@ -961,8 +969,8 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .speech-bubble {
-    top: -62px;
-    width: 205px;
+    bottom: 16px;
+    width: clamp(155px, 21%, 185px);
     padding: 8px;
     font-size: 0.85rem;
     line-height: 1.35;
@@ -970,7 +978,7 @@ html[dir="ltr"] .speech-bubble::after {
 
   .student-desks {
     top: 12px;
-    gap: 10px 18px;
+    gap: 8px 18px;
   }
 
   .desk-unit {
@@ -978,7 +986,7 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .number-line-area {
-    padding-top: 70px;
+    padding-block: 0;
   }
 
   .result-panel {
@@ -1107,7 +1115,8 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .speech-bubble {
-    inset-inline-start: 20px;
+    inset-inline-end: 8px;
+    bottom: 12px;
     width: 170px;
     font-size: 0.82rem;
   }
@@ -1117,7 +1126,7 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .number-line-area {
-    padding-top: 70px;
+    padding-block: 0;
   }
 }
 
