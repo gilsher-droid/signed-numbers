@@ -11,9 +11,9 @@ const boardResult = document.getElementById("boardResult");
 const speechBubble = document.getElementById("speechBubble");
 const standingStudent = document.getElementById("standingStudent");
 const movingStudent = document.getElementById("movingStudent");
+const movingDirectionArrow = movingStudent.querySelector(".direction-arrow");
 const numberLine = document.getElementById("numberLine");
 const numberLineArea = document.querySelector(".number-line-area");
-const resultPanel = document.getElementById("resultPanel");
 const studentDesks = document.getElementById("studentDesks");
 const languageButtons = Array.from(
   document.querySelectorAll(".language-option")
@@ -24,7 +24,6 @@ const leftToRightIsolate = value => `\u2066${value}\u2069`;
 let tiles = [];
 let minimumTile = -10;
 let currentPosition = 0;
-let currentRotation = 0;
 let isRunning = false;
 let messageState = null;
 let speechState = null;
@@ -220,15 +219,67 @@ function highlightTile(number) {
   });
 }
 
+function clearStudentMotion() {
+  movingStudent.classList.remove(
+    "is-arriving",
+    "is-turning",
+    "is-walking",
+    "is-walking-backward"
+  );
+}
+
+function setStudentFacing(facing) {
+  movingStudent.dataset.facing = facing;
+
+  const arrows = {
+    front: "↑",
+    right: "→",
+    left: "←"
+  };
+
+  movingDirectionArrow.textContent = arrows[facing] || arrows.front;
+}
+
 function placeStudentOnTile(number) {
   currentPosition = number;
-  currentRotation = 0;
 
   movingStudent.style.left = `${getStudentLeft(number)}px`;
-  movingStudent.style.transform = "translateX(-50%) rotate(0deg)";
+  clearStudentMotion();
+  setStudentFacing("front");
 
   clearHighlights();
   highlightTile(number);
+}
+
+async function animateStudentArrival() {
+  movingStudent.classList.add("is-arriving");
+  movingStudent.style.opacity = "1";
+  await sleep(750);
+  movingStudent.classList.remove("is-arriving");
+}
+
+async function animateStudentTurn(facing) {
+  movingStudent.classList.add("is-turning");
+  setStudentFacing(facing);
+  await sleep(760);
+  movingStudent.classList.remove("is-turning");
+}
+
+async function animateStudentStep(nextPosition, isBackward) {
+  movingStudent.classList.add("is-walking");
+  movingStudent.classList.toggle("is-walking-backward", isBackward);
+
+  currentPosition = nextPosition;
+  movingStudent.style.left = `${getStudentLeft(currentPosition)}px`;
+
+  await sleep(620);
+
+  movingStudent.classList.remove(
+    "is-walking",
+    "is-walking-backward"
+  );
+
+  await sleep(90);
 }
 
 async function runSimulation() {
@@ -257,7 +308,6 @@ async function runSimulation() {
   isRunning = true;
   startButton.disabled = true;
   boardResult.textContent = "";
-  resultPanel.textContent = "";
 
   updateBoardExercise();
   createNumberLine(firstNumber, result);
@@ -271,21 +321,18 @@ async function runSimulation() {
 
   standingStudent.style.opacity = "0";
   placeStudentOnTile(firstNumber);
-  movingStudent.style.opacity = "1";
   setMessage("message.walkTo", { first: firstNumber });
 
-  await sleep(1500);
+  await animateStudentArrival();
 
   setSpeech("speech.position", { first: firstNumber });
 
   await sleep(900);
 
-  const turnAmount = operator === "+" ? 90 : -90;
   const turnDirection = {
     i18n: operator === "+" ? "direction.right" : "direction.left"
   };
-
-  currentRotation += turnAmount;
+  const facing = operator === "+" ? "right" : "left";
 
   setSpeech("speech.turn", {
     operator,
@@ -293,10 +340,8 @@ async function runSimulation() {
   });
   setMessage("message.turn", { direction: turnDirection });
 
-  movingStudent.style.transform =
-    `translateX(-50%) rotate(${currentRotation}deg)`;
-
-  await sleep(1600);
+  await animateStudentTurn(facing);
+  await sleep(600);
 
   const numberOfSteps = Math.abs(secondNumber);
   const walkingDirection = {
@@ -339,8 +384,8 @@ async function runSimulation() {
       oldTile.classList.add("visited");
     }
 
-    currentPosition += directionOnLine;
-    movingStudent.style.left = `${getStudentLeft(currentPosition)}px`;
+    const nextPosition = currentPosition + directionOnLine;
+    await animateStudentStep(nextPosition, secondNumber < 0);
 
     const currentTile = getTile(currentPosition);
 
@@ -353,7 +398,7 @@ async function runSimulation() {
       });
     }
 
-    await sleep(650);
+    await sleep(180);
   }
 
   setSpeech("speech.question");
@@ -363,7 +408,6 @@ async function runSimulation() {
 
   const completedExercise = `${exercise} = ${currentPosition}`;
   boardResult.textContent = completedExercise;
-  resultPanel.textContent = completedExercise;
   setSpeech("speech.answer", { position: currentPosition });
 
   isRunning = false;
@@ -380,12 +424,12 @@ function resetSimulator() {
   secondNumberInput.value = 3;
 
   currentPosition = 0;
-  currentRotation = 0;
 
   standingStudent.style.opacity = "1";
   movingStudent.style.opacity = "0";
   boardResult.textContent = "";
-  resultPanel.textContent = "";
+  clearStudentMotion();
+  setStudentFacing("front");
 
   setMessage("message.initial");
   setSpeech("speech.initial");

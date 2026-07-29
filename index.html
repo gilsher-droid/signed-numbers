@@ -21,7 +21,7 @@
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&amp;family=Montserrat:wght@600;700;800&amp;family=Noto+Sans+Hebrew:wght@400;600;700;800&amp;display=swap"
   />
-  <link rel="stylesheet" href="css/style.css?v=rtl-controls-2" />
+  <link rel="stylesheet" href="css/style.css?v=classroom-board-3" />
 </head>
 
 <body>
@@ -87,68 +87,6 @@
 
     <main>
       <section
-        class="controls"
-        data-i18n-aria-label="controls.aria"
-      >
-        <div class="field field-first">
-          <label for="firstNumber" data-i18n="controls.firstNumber">
-            המספר הראשון
-          </label>
-          <input
-            id="firstNumber"
-            type="number"
-            value="0"
-            min="-30"
-            max="30"
-            step="1"
-            inputmode="numeric"
-          />
-        </div>
-
-        <div class="field field-operator">
-          <label for="operator" data-i18n="controls.operation">הפעולה</label>
-          <select id="operator">
-            <option value="+">+</option>
-            <option value="-">−</option>
-          </select>
-        </div>
-
-        <div class="field field-second">
-          <label for="secondNumber" data-i18n="controls.secondNumber">
-            המספר השני
-          </label>
-          <input
-            id="secondNumber"
-            type="number"
-            value="3"
-            min="-30"
-            max="30"
-            step="1"
-            inputmode="numeric"
-          />
-        </div>
-
-        <button id="startButton" type="button" data-i18n="controls.start">
-          הפעלת התרגיל
-        </button>
-        <button
-          id="resetButton"
-          class="reset-button"
-          type="button"
-          data-i18n="controls.reset"
-        >
-          איפוס
-        </button>
-      </section>
-
-      <div
-        id="message"
-        class="message"
-        role="status"
-        aria-live="polite"
-      ></div>
-
-      <section
         class="classroom"
         data-i18n-aria-label="classroom.aria"
       >
@@ -168,10 +106,81 @@
             <div class="board-title" data-i18n="board.title">
               מספרים מכוונים
             </div>
-            <div id="boardExercise" class="board-exercise">0 + 3</div>
+
+            <section
+              class="controls board-controls"
+              data-i18n-aria-label="controls.aria"
+            >
+              <div class="field field-first">
+                <label for="firstNumber" data-i18n="controls.firstNumber">
+                  המספר הראשון
+                </label>
+                <input
+                  id="firstNumber"
+                  type="number"
+                  value="0"
+                  min="-30"
+                  max="30"
+                  step="1"
+                  inputmode="numeric"
+                />
+              </div>
+
+              <div class="field field-operator">
+                <label for="operator" data-i18n="controls.operation">
+                  הפעולה
+                </label>
+                <select id="operator">
+                  <option value="+">+</option>
+                  <option value="-">−</option>
+                </select>
+              </div>
+
+              <div class="field field-second">
+                <label for="secondNumber" data-i18n="controls.secondNumber">
+                  המספר השני
+                </label>
+                <input
+                  id="secondNumber"
+                  type="number"
+                  value="3"
+                  min="-30"
+                  max="30"
+                  step="1"
+                  inputmode="numeric"
+                />
+              </div>
+
+              <button
+                id="startButton"
+                type="button"
+                data-i18n="controls.start"
+              >
+                הפעלת התרגיל
+              </button>
+              <button
+                id="resetButton"
+                class="reset-button"
+                type="button"
+                data-i18n="controls.reset"
+              >
+                איפוס
+              </button>
+            </section>
+
+            <div class="board-display">
+              <div id="boardExercise" class="board-exercise">0 + 3</div>
+              <div
+                id="boardResult"
+                class="board-result"
+                aria-live="polite"
+              ></div>
+            </div>
+
             <div
-              id="boardResult"
-              class="board-result"
+              id="message"
+              class="message board-message"
+              role="status"
               aria-live="polite"
             ></div>
           </div>
@@ -212,12 +221,18 @@
             role="img"
             data-i18n-aria-label="numberLine.aria"
           >
-            <div id="movingStudent" class="moving-student">
-              <div class="head"><div class="hair"></div></div>
-              <div class="body">
-                <div class="direction-arrow" aria-hidden="true">↑</div>
+            <div
+              id="movingStudent"
+              class="moving-student"
+              data-facing="front"
+            >
+              <div class="student-pose">
+                <div class="head"><div class="hair"></div></div>
+                <div class="body">
+                  <div class="direction-arrow" aria-hidden="true">↑</div>
+                </div>
+                <div class="legs"></div>
               </div>
-              <div class="legs"></div>
               <div class="person-label" data-i18n="people.student">
                 התלמיד
               </div>
@@ -234,16 +249,10 @@
         </div>
       </section>
 
-      <div
-        id="resultPanel"
-        class="result-panel"
-        role="status"
-        aria-live="polite"
-      ></div>
     </main>
   </div>
 
   <script src="js/i18n.js?v=bilingual-1"></script>
-  <script src="js/app.js?v=bilingual-1"></script>
+  <script src="js/app.js?v=classroom-board-3"></script>
 </body>
 </html>

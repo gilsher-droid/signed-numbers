@@ -226,30 +226,38 @@ main {
 }
 
 .controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns:
+    minmax(96px, 1fr)
+    minmax(70px, 0.55fr)
+    minmax(96px, 1fr)
+    minmax(118px, auto)
+    minmax(76px, auto);
+  grid-template-areas: "first operator second start reset";
   align-items: end;
-  gap: 12px;
-  padding: 20px;
-  margin-bottom: 18px;
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  gap: 8px;
+  padding: 0;
+  margin: 0;
 }
 
 .field {
   display: flex;
-  flex: 1 1 155px;
   flex-direction: column;
-  gap: 6px;
-  max-width: 220px;
+  gap: 3px;
+  min-width: 0;
+  max-width: none;
 }
 
 .field-operator {
-  flex-basis: 110px;
-  max-width: 130px;
+  grid-area: operator;
+}
+
+.field-first {
+  grid-area: first;
+}
+
+.field-second {
+  grid-area: second;
 }
 
 label {
@@ -315,28 +323,64 @@ button:disabled {
   background: #4b5565;
 }
 
-.message,
-.result-panel {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--surface);
-  text-align: center;
-  box-shadow: var(--shadow);
+#startButton {
+  grid-area: start;
+}
+
+#resetButton {
+  grid-area: reset;
 }
 
 .message {
-  min-height: 68px;
-  padding: 14px 18px;
-  margin-bottom: 18px;
-  color: var(--primary);
-  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  text-align: center;
+}
+
+.board-controls label {
+  overflow: hidden;
+  color: #e5f5e9;
+  font-size: 0.7rem;
   font-weight: 600;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-controls input,
+.board-controls select {
+  min-height: 38px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  font-size: 1rem;
+}
+
+.board-controls button {
+  min-height: 38px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.board-message {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 5px 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.42);
+  border-radius: 7px;
+  color: #f7fbf8;
+  background: rgba(0, 0, 0, 0.12);
+  font-size: clamp(0.78rem, 1.5vw, 0.95rem);
+  font-weight: 600;
+  line-height: 1.25;
 }
 
 .classroom {
   position: relative;
   display: grid;
-  grid-template-rows: 245px auto minmax(320px, 1fr);
+  grid-template-rows: 300px auto minmax(320px, 1fr);
   min-height: 690px;
   overflow: hidden;
   border: 8px solid #786048;
@@ -349,7 +393,7 @@ button:disabled {
 
 .front-wall {
   position: relative;
-  height: 245px;
+  height: 300px;
   border-bottom: 8px solid #9f8c6e;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.15), transparent),
@@ -358,11 +402,14 @@ button:disabled {
 
 .board {
   position: absolute;
-  top: 18px;
+  top: 14px;
   left: 50%;
-  width: min(434px, 46%);
-  height: 123px;
-  padding: 12px;
+  width: min(760px, 68%);
+  height: 232px;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(34px, auto);
+  gap: 7px;
+  padding: 10px 16px 12px;
   transform: translateX(-50%);
   border: 8px solid var(--board-frame);
   border-radius: 5px;
@@ -379,23 +426,39 @@ button:disabled {
 }
 
 .board-title {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  line-height: 1;
   opacity: 0.85;
 }
 
+.board-display {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
 .board-exercise {
-  margin-top: 8px;
-  font-size: clamp(1.45rem, 3.5vw, 2rem);
+  font-size: clamp(1.55rem, 3.2vw, 2.25rem);
   font-weight: 700;
+  line-height: 1;
   direction: ltr;
 }
 
 .board-result {
-  min-height: 22px;
-  margin-top: 4px;
+  min-height: 24px;
+  padding-inline-start: 12px;
+  border-inline-start: 2px solid rgba(255, 232, 154, 0.55);
   color: #ffe89a;
-  font-size: 1.05rem;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-weight: 700;
+  line-height: 1.2;
   direction: ltr;
+}
+
+.board-result:empty {
+  display: none;
 }
 
 .window {
@@ -564,53 +627,44 @@ button:disabled {
   height: 78px;
 }
 
-.front-people .head,
-.moving-student .head {
+.front-people .head {
   width: 24px;
   height: 24px;
 }
 
-.front-people .hair,
-.moving-student .hair {
+.front-people .hair {
   top: -2px;
   left: 2px;
   width: 18px;
   height: 9px;
 }
 
-.front-people .body,
-.moving-student .body {
+.front-people .body {
   width: 29px;
   height: 37px;
   border-radius: 7px 7px 3px 3px;
 }
 
-.front-people .legs,
-.moving-student .legs {
+.front-people .legs {
   width: 24px;
   height: 18px;
 }
 
 .front-people .legs::before,
-.front-people .legs::after,
-.moving-student .legs::before,
-.moving-student .legs::after {
+.front-people .legs::after {
   width: 6px;
   height: 18px;
 }
 
-.front-people .legs::before,
-.moving-student .legs::before {
+.front-people .legs::before {
   left: 3px;
 }
 
-.front-people .legs::after,
-.moving-student .legs::after {
+.front-people .legs::after {
   right: 3px;
 }
 
-.front-people .direction-arrow,
-.moving-student .direction-arrow {
+.front-people .direction-arrow {
   top: 10px;
   font-size: 0.95rem;
 }
@@ -816,25 +870,235 @@ html[dir="ltr"] .speech-bubble::after {
   position: absolute;
   bottom: 42px;
   left: 50%;
-  width: 41px;
-  height: 78px;
+  width: 50px;
+  height: 92px;
   opacity: 0;
-  transform-origin: center center;
+  transform: translateX(-50%);
   transition:
-    left 0.65s ease,
-    transform 0.65s ease,
+    left 0.62s cubic-bezier(0.35, 0.05, 0.2, 1),
     opacity 0.4s ease;
   z-index: 20;
 }
 
-.result-panel {
-  min-height: 62px;
-  margin-top: 18px;
-  padding: 13px;
-  color: var(--primary);
-  font-size: clamp(1.25rem, 3vw, 1.6rem);
-  font-weight: 800;
-  direction: ltr;
+.student-pose {
+  position: relative;
+  width: 50px;
+  height: 86px;
+  transform-origin: center 82%;
+  transition: transform 0.72s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: student-breathe 2.4s ease-in-out infinite;
+}
+
+.moving-student .head {
+  width: 29px;
+  height: 29px;
+  transition: transform 0.25s ease;
+}
+
+.moving-student .hair {
+  top: -2px;
+  left: 2px;
+  width: 23px;
+  height: 11px;
+}
+
+.moving-student .body {
+  width: 35px;
+  height: 42px;
+  overflow: visible;
+  border-radius: 8px 8px 4px 4px;
+}
+
+.moving-student .body::before,
+.moving-student .body::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  width: 7px;
+  height: 31px;
+  border: 2px solid #263842;
+  border-radius: 7px;
+  background: #efbd94;
+  transform-origin: top center;
+}
+
+.moving-student .body::before {
+  left: -8px;
+}
+
+.moving-student .body::after {
+  right: -8px;
+}
+
+.moving-student .legs {
+  width: 30px;
+  height: 23px;
+}
+
+.moving-student .legs::before,
+.moving-student .legs::after {
+  width: 7px;
+  height: 23px;
+  transform-origin: top center;
+}
+
+.moving-student .legs::before {
+  left: 4px;
+}
+
+.moving-student .legs::after {
+  right: 4px;
+}
+
+.moving-student .direction-arrow {
+  top: 11px;
+  font-size: 1rem;
+  transition: transform 0.35s ease;
+}
+
+.moving-student[data-facing="right"] .student-pose {
+  transform: perspective(170px) rotateY(-54deg) scaleX(0.92);
+}
+
+.moving-student[data-facing="left"] .student-pose {
+  transform: perspective(170px) rotateY(54deg) scaleX(0.92);
+}
+
+.moving-student.is-turning .student-pose {
+  animation: student-turn 0.72s ease-in-out;
+}
+
+.moving-student.is-arriving .student-pose {
+  animation: student-arrive 0.75s ease-out;
+}
+
+.moving-student.is-walking .student-pose {
+  animation: student-step 0.42s ease-in-out infinite;
+}
+
+.moving-student.is-walking .head {
+  animation: head-step 0.42s ease-in-out infinite;
+}
+
+.moving-student.is-walking .legs::before {
+  animation: leg-forward 0.42s ease-in-out infinite alternate;
+}
+
+.moving-student.is-walking .legs::after {
+  animation: leg-back 0.42s ease-in-out infinite alternate;
+}
+
+.moving-student.is-walking .body::before {
+  animation: arm-back 0.42s ease-in-out infinite alternate;
+}
+
+.moving-student.is-walking .body::after {
+  animation: arm-forward 0.42s ease-in-out infinite alternate;
+}
+
+.moving-student.is-walking-backward .student-pose {
+  filter: saturate(0.92);
+}
+
+@keyframes student-breathe {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -1px;
+  }
+}
+
+@keyframes student-turn {
+  0% {
+    scale: 1 1;
+  }
+  45% {
+    scale: 0.72 1.04;
+  }
+  70% {
+    scale: 1.04 0.98;
+  }
+  100% {
+    scale: 1 1;
+  }
+}
+
+@keyframes student-arrive {
+  0% {
+    translate: 0 -12px;
+    scale: 0.88;
+    opacity: 0;
+  }
+  65% {
+    translate: 0 2px;
+    scale: 1.04;
+    opacity: 1;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+@keyframes student-step {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: -1deg;
+  }
+  50% {
+    translate: 0 -6px;
+    rotate: 1deg;
+  }
+}
+
+@keyframes head-step {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2px);
+  }
+}
+
+@keyframes leg-forward {
+  from {
+    transform: rotate(18deg);
+  }
+  to {
+    transform: rotate(-20deg);
+  }
+}
+
+@keyframes leg-back {
+  from {
+    transform: rotate(-20deg);
+  }
+  to {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes arm-forward {
+  from {
+    transform: rotate(-16deg);
+  }
+  to {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes arm-back {
+  from {
+    transform: rotate(18deg);
+  }
+  to {
+    transform: rotate(-16deg);
+  }
 }
 
 @media (min-width: 901px) and (min-height: 700px) {
@@ -871,27 +1135,23 @@ html[dir="ltr"] .speech-bubble::after {
 
   main {
     min-height: 0;
-    display: grid;
-    grid-template:
-      "controls classroom" auto
-      "message classroom" minmax(0, 1fr)
-      "result classroom" auto
-      / minmax(280px, 330px) minmax(0, 1fr);
-    gap: 14px 16px;
+    height: 100%;
+    display: block;
   }
 
   .controls {
-    grid-area: controls;
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: auto auto;
-    grid-template-areas:
-      "first first operator operator second second"
-      "start start start reset reset reset";
-    gap: 10px;
+    grid-template-columns:
+      minmax(96px, 1fr)
+      minmax(70px, 0.55fr)
+      minmax(96px, 1fr)
+      minmax(118px, auto)
+      minmax(76px, auto);
+    grid-template-rows: auto;
+    grid-template-areas: "first operator second start reset";
+    gap: 8px;
     margin: 0;
-    padding: 14px;
-    border-radius: 18px;
+    padding: 0;
   }
 
   .field {
@@ -916,7 +1176,7 @@ html[dir="ltr"] .speech-bubble::after {
   .controls input,
   .controls select,
   .controls button {
-    min-height: 42px;
+    min-height: 38px;
   }
 
   #startButton {
@@ -929,22 +1189,11 @@ html[dir="ltr"] .speech-bubble::after {
     padding-inline: 10px;
   }
 
-  .message {
-    grid-area: message;
-    min-height: 0;
-    display: grid;
-    place-items: center;
-    overflow: auto;
-    margin: 0;
-    padding: 16px;
-  }
-
   .classroom {
-    grid-area: classroom;
     width: 100%;
     height: 100%;
     min-height: 0;
-    grid-template-rows: 230px 150px minmax(0, 1fr);
+    grid-template-rows: 300px 150px minmax(0, 1fr);
   }
 
   .front-wall {
@@ -958,11 +1207,12 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .board {
-    height: min(123px, calc(100% - 34px));
+    width: min(760px, 68%);
+    height: 232px;
   }
 
   .board-exercise {
-    margin-top: 12px;
+    margin-top: 0;
   }
 
   .front-people {
@@ -990,13 +1240,6 @@ html[dir="ltr"] .speech-bubble::after {
     padding-block: 0;
   }
 
-  .result-panel {
-    grid-area: result;
-    min-height: 54px;
-    margin: 0;
-    padding: 8px;
-    border-radius: 16px;
-  }
 }
 
 @media (min-width: 901px) and (max-width: 1120px) {
@@ -1005,12 +1248,9 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .board {
-    width: min(434px, 54%);
+    width: min(720px, 76%);
   }
 
-  main {
-    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 900px) {
@@ -1028,7 +1268,7 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .board {
-    width: min(434px, 54%);
+    width: min(720px, 82%);
   }
 
   .student-desks {
@@ -1083,32 +1323,41 @@ html[dir="ltr"] .speech-bubble::after {
     font-size: 0.9rem;
   }
 
-  .controls {
-    align-items: stretch;
-    padding: 16px;
-  }
-
-  .field,
-  .field-operator,
-  .controls > button {
-    width: 100%;
-    max-width: none;
-    flex-basis: 100%;
-  }
-
   .classroom {
-    grid-template-rows: 270px auto minmax(320px, 1fr);
-    min-height: 840px;
+    grid-template-rows: 320px auto minmax(320px, 1fr);
+    min-height: 880px;
   }
 
   .front-wall {
-    height: 270px;
+    height: 320px;
   }
 
   .board {
-    top: 20px;
-    width: 58%;
-    height: 112px;
+    top: 14px;
+    width: calc(100% - 24px);
+    height: 244px;
+    padding-inline: 10px;
+  }
+
+  .board-controls {
+    grid-template-columns: minmax(80px, 1fr) 70px minmax(80px, 1fr);
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "first operator second"
+      "start start reset";
+    gap: 6px;
+  }
+
+  .board-controls button {
+    min-height: 34px;
+  }
+
+  .board-display {
+    min-height: 36px;
+  }
+
+  .board-message {
+    font-size: 0.75rem;
   }
 
   .front-people {
@@ -1152,8 +1401,19 @@ html[dir="ltr"] .speech-bubble::after {
   button,
   .fundamatics-home-link,
   .tile,
-  .moving-student {
+  .moving-student,
+  .student-pose {
     transition: none;
+  }
+
+  .moving-student,
+  .moving-student .student-pose,
+  .moving-student .head,
+  .moving-student .legs::before,
+  .moving-student .legs::after,
+  .moving-student .body::before,
+  .moving-student .body::after {
+    animation: none;
   }
 
   button:hover:not(:disabled),
