@@ -8,7 +8,7 @@
     content="Interactive signed-numbers simulator by Fundamatics"
   />
 
-  <title>מספרים מכוונים — Fundamatics</title>
+  <title>מספרים מכוונים — להרגיש דרך הגוף — Fundamatics</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,7 +21,7 @@
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&amp;family=Montserrat:wght@600;700;800&amp;family=Noto+Sans+Hebrew:wght@400;600;700;800&amp;display=swap"
   />
-  <link rel="stylesheet" href="css/style.css?v=character-layout-1" />
+  <link rel="stylesheet" href="css/style.css?v=playback-modes-1" />
 </head>
 
 <body>
@@ -44,7 +44,9 @@
           <span class="brand-tagline">Maths for life</span>
         </a>
         <div class="product-identity">
-          <h1 data-i18n="header.title">מספרים מכוונים</h1>
+          <h1 data-i18n="header.title">
+            מספרים מכוונים — להרגיש דרך הגוף
+          </h1>
           <p data-i18n="header.subtitle">
             סימולטור גופני ללימוד חיבור וחיסור של מספרים מכוונים
           </p>
@@ -104,7 +106,7 @@
 
           <div class="board">
             <div class="board-title" data-i18n="board.title">
-              מספרים מכוונים
+              כתבו את התרגיל
             </div>
 
             <section
@@ -113,7 +115,7 @@
             >
               <div class="field field-first">
                 <label for="firstNumber" data-i18n="controls.firstNumber">
-                  המספר הראשון
+                  הכניסו את המספר הראשון
                 </label>
                 <input
                   id="firstNumber"
@@ -128,7 +130,7 @@
 
               <div class="field field-operator">
                 <label for="operator" data-i18n="controls.operation">
-                  הפעולה
+                  בחרו את הפעולה
                 </label>
                 <select id="operator">
                   <option value="+">+</option>
@@ -138,12 +140,12 @@
 
               <div class="field field-second">
                 <label for="secondNumber" data-i18n="controls.secondNumber">
-                  המספר השני
+                  הכניסו את המספר השני
                 </label>
                 <input
                   id="secondNumber"
                   type="number"
-                  value="3"
+                  value="0"
                   min="-30"
                   max="30"
                   step="1"
@@ -174,7 +176,7 @@
                 class="board-exercise"
                 aria-live="polite"
               >
-                0 + 3
+                0 + 0
               </div>
             </div>
 
@@ -190,6 +192,28 @@
               role="group"
               data-i18n-aria-label="playback.aria"
             >
+              <div
+                class="playback-mode-switch"
+                role="group"
+                data-i18n-aria-label="playback.mode.label"
+              >
+                <button
+                  class="playback-mode-option is-active"
+                  type="button"
+                  data-playback-mode="auto"
+                  data-i18n="playback.mode.auto"
+                >
+                  ניגון רציף
+                </button>
+                <button
+                  class="playback-mode-option"
+                  type="button"
+                  data-playback-mode="manual"
+                  data-i18n="playback.mode.manual"
+                >
+                  צעד־אחר־צעד
+                </button>
+              </div>
               <button
                 id="previousStepButton"
                 class="playback-button"
@@ -213,14 +237,6 @@
                 data-i18n-aria-label="playback.pause"
               >
                 ⏸
-              </button>
-              <button
-                id="stopButton"
-                class="playback-button"
-                type="button"
-                data-i18n-aria-label="playback.stop"
-              >
-                ⏹
               </button>
               <button
                 id="nextStepButton"
@@ -319,7 +335,7 @@
     </main>
   </div>
 
-  <script src="js/i18n.js?v=dialogue-playback-4"></script>
-  <script src="js/app.js?v=character-layout-1"></script>
+  <script src="js/i18n.js?v=playback-modes-1"></script>
+  <script src="js/app.js?v=playback-modes-1"></script>
 </body>
 </html>

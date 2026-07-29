@@ -379,11 +379,44 @@ button:disabled {
 
 .playback-controls {
   display: grid;
-  grid-template-columns: repeat(5, 34px) minmax(120px, 1fr) auto;
+  grid-template-columns: auto repeat(4, 34px) minmax(120px, 1fr) auto;
   align-items: center;
   justify-content: center;
   gap: 6px;
   direction: ltr;
+}
+
+.playback-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.1);
+  direction: rtl;
+}
+
+.playback-mode-option {
+  min-height: 26px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: transparent;
+  color: #f7fbf8;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.playback-mode-option:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: none;
+}
+
+.playback-mode-option.is-active,
+.playback-mode-option.is-active:hover:not(:disabled) {
+  background: var(--brand-purple);
+  color: white;
 }
 
 .playback-button {
@@ -766,6 +799,10 @@ button:disabled {
   border-bottom: 2px solid #344955;
   background: white;
   transform: translateY(-50%) rotate(45deg);
+}
+
+.teacher-speech-bubble:empty {
+  display: none;
 }
 
 .student-speech-bubble {
@@ -1500,8 +1537,13 @@ button:disabled {
   }
 
   .playback-controls {
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+
+  .playback-mode-switch {
+    grid-column: 1 / -1;
+    justify-content: center;
   }
 
   .playback-button {
@@ -1509,11 +1551,11 @@ button:disabled {
   }
 
   .playback-progress {
-    grid-column: 1 / 5;
+    grid-column: 1 / 4;
   }
 
   .playback-counter {
-    grid-column: 5;
+    grid-column: 4;
   }
 
   .front-people {

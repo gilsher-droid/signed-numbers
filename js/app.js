@@ -25,10 +25,12 @@ const previousStepButton = document.getElementById(
 );
 const playButton = document.getElementById("playButton");
 const pauseButton = document.getElementById("pauseButton");
-const stopButton = document.getElementById("stopButton");
 const nextStepButton = document.getElementById("nextStepButton");
 const playbackProgress = document.getElementById("playbackProgress");
 const playbackCounter = document.getElementById("playbackCounter");
+const playbackModeButtons = Array.from(
+  document.querySelectorAll("[data-playback-mode]")
+);
 const languageButtons = Array.from(
   document.querySelectorAll(".language-option")
 );
@@ -43,6 +45,7 @@ let currentTimelineStep = 0;
 let playbackGeneration = 0;
 let isPlaying = false;
 let isPaused = false;
+let playbackMode = "auto";
 let exerciseConfig = null;
 let messageState = null;
 let teacherSpeechState = null;
@@ -111,6 +114,10 @@ function setTeacherSpeech(key, replacements = {}) {
 }
 
 function setStudentSpeech(key, replacements = {}) {
+  if (key) {
+    setTeacherSpeech(null);
+  }
+
   studentSpeechState = key ? { key, replacements } : null;
   renderState(studentSpeechBubble, studentSpeechState);
   studentSpeechBubble.hidden = !studentSpeechState;
@@ -419,7 +426,6 @@ function updatePlaybackControls() {
   nextStepButton.disabled =
     currentTimelineStep === LAST_TIMELINE_STEP;
   pauseButton.disabled = !isPlaying || isPaused;
-  stopButton.disabled = currentTimelineStep === 0 && !isPlaying;
   startButton.disabled = isPlaying;
 
   firstNumberInput.disabled = isPlaying;
@@ -428,7 +434,22 @@ function updatePlaybackControls() {
 
   playButton.setAttribute("aria-pressed", String(isPlaying && !isPaused));
   pauseButton.setAttribute("aria-pressed", String(isPaused));
+  playbackModeButtons.forEach(button => {
+    const isActive = button.dataset.playbackMode === playbackMode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
   movingStudent.classList.toggle("is-paused", isPaused);
+}
+
+function setPlaybackMode(mode) {
+  if (!["auto", "manual"].includes(mode) || mode === playbackMode) {
+    return;
+  }
+
+  cancelPlayback();
+  playbackMode = mode;
+  updatePlaybackControls();
 }
 
 async function waitForPlayback(milliseconds, generation) {
@@ -737,17 +758,9 @@ async function runSimulation() {
   }
 
   await renderTimelineStep(0);
-  await playTimeline();
-}
-
-async function stopPlayback() {
-  cancelPlayback();
-
-  if (!exerciseConfig && !prepareExercise()) {
-    return;
+  if (playbackMode === "auto") {
+    await playTimeline();
   }
-
-  await renderTimelineStep(0);
 }
 
 async function resetSimulator() {
@@ -755,7 +768,7 @@ async function resetSimulator() {
 
   firstNumberInput.value = 0;
   operatorInput.value = "+";
-  secondNumberInput.value = 3;
+  secondNumberInput.value = 0;
   exerciseConfig = null;
 
   if (!prepareExercise()) {
@@ -791,7 +804,6 @@ pauseButton.addEventListener("click", () => {
   isPaused = true;
   updatePlaybackControls();
 });
-stopButton.addEventListener("click", stopPlayback);
 previousStepButton.addEventListener("click", () => {
   seekTimeline(currentTimelineStep - 1);
 });
@@ -800,6 +812,12 @@ nextStepButton.addEventListener("click", () => {
 });
 playbackProgress.addEventListener("input", () => {
   seekTimeline(Number(playbackProgress.value));
+});
+
+playbackModeButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    setPlaybackMode(button.dataset.playbackMode);
+  });
 });
 
 languageButtons.forEach(button => {
