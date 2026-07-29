@@ -9,24 +9,45 @@ const messageBox = document.getElementById("message");
 const boardExercise = document.getElementById("boardExercise");
 const boardResult = document.getElementById("boardResult");
 const speechBubble = document.getElementById("speechBubble");
+const studentSpeechBubble = document.getElementById(
+  "studentSpeechBubble"
+);
+const classroom = document.querySelector(".classroom");
 const standingStudent = document.getElementById("standingStudent");
 const movingStudent = document.getElementById("movingStudent");
-const movingDirectionArrow = movingStudent.querySelector(".direction-arrow");
+const movingDirectionArrow = movingStudent.querySelector(
+  ".direction-arrow"
+);
 const numberLine = document.getElementById("numberLine");
 const numberLineArea = document.querySelector(".number-line-area");
 const studentDesks = document.getElementById("studentDesks");
+const previousStepButton = document.getElementById(
+  "previousStepButton"
+);
+const playButton = document.getElementById("playButton");
+const pauseButton = document.getElementById("pauseButton");
+const stopButton = document.getElementById("stopButton");
+const nextStepButton = document.getElementById("nextStepButton");
+const playbackProgress = document.getElementById("playbackProgress");
+const playbackCounter = document.getElementById("playbackCounter");
 const languageButtons = Array.from(
   document.querySelectorAll(".language-option")
 );
 
+const LAST_TIMELINE_STEP = 8;
 const leftToRightIsolate = value => `\u2066${value}\u2069`;
 
 let tiles = [];
 let minimumTile = -10;
 let currentPosition = 0;
-let isRunning = false;
+let currentTimelineStep = 0;
+let playbackGeneration = 0;
+let isPlaying = false;
+let isPaused = false;
+let exerciseConfig = null;
 let messageState = null;
-let speechState = null;
+let teacherSpeechState = null;
+let studentSpeechState = null;
 
 function sleep(milliseconds) {
   return new Promise(resolve => {
@@ -40,6 +61,10 @@ function isValidInteger(number) {
 
 function formatNumber(number) {
   return number < 0 ? `(${number})` : `${number}`;
+}
+
+function formatSpeechNumber(number) {
+  return leftToRightIsolate(String(number));
 }
 
 function formatExercise(firstNumber, operator, secondNumber) {
@@ -77,13 +102,23 @@ function renderState(element, state) {
 }
 
 function setMessage(key, replacements = {}) {
-  messageState = { key, replacements };
+  messageState = key ? { key, replacements } : null;
   renderState(messageBox, messageState);
 }
 
-function setSpeech(key, replacements = {}) {
-  speechState = { key, replacements };
-  renderState(speechBubble, speechState);
+function setTeacherSpeech(key, replacements = {}) {
+  teacherSpeechState = key ? { key, replacements } : null;
+  renderState(speechBubble, teacherSpeechState);
+}
+
+function setStudentSpeech(key, replacements = {}) {
+  studentSpeechState = key ? { key, replacements } : null;
+  renderState(studentSpeechBubble, studentSpeechState);
+  studentSpeechBubble.hidden = !studentSpeechState;
+
+  if (studentSpeechState) {
+    window.requestAnimationFrame(updateStudentBubblePosition);
+  }
 }
 
 function applyTranslations() {
@@ -112,7 +147,9 @@ function applyTranslations() {
   });
 
   renderState(messageBox, messageState);
-  renderState(speechBubble, speechState);
+  renderState(speechBubble, teacherSpeechState);
+  renderState(studentSpeechBubble, studentSpeechState);
+  updateStudentBubblePosition();
 }
 
 function updateBoardExercise() {
@@ -219,12 +256,30 @@ function highlightTile(number) {
   });
 }
 
+function markPath(firstNumber, finalNumber) {
+  clearHighlights();
+
+  const direction = Math.sign(finalNumber - firstNumber);
+  let position = firstNumber;
+
+  while (direction !== 0 && position !== finalNumber) {
+    const tile = getTile(position);
+    if (tile) {
+      tile.classList.add("visited");
+    }
+    position += direction;
+  }
+
+  highlightTile(finalNumber);
+}
+
 function clearStudentMotion() {
   movingStudent.classList.remove(
     "is-arriving",
     "is-turning",
     "is-walking",
-    "is-walking-backward"
+    "is-walking-backward",
+    "is-paused"
   );
 }
 
@@ -240,15 +295,29 @@ function setStudentFacing(facing) {
   movingDirectionArrow.textContent = arrows[facing] || arrows.front;
 }
 
-function placeStudentOnTile(number) {
+function placeStudentOnTile(number, facing = "front") {
   currentPosition = number;
-
   movingStudent.style.left = `${getStudentLeft(number)}px`;
   clearStudentMotion();
-  setStudentFacing("front");
+  setStudentFacing(facing);
+  window.requestAnimationFrame(updateStudentBubblePosition);
+}
 
-  clearHighlights();
-  highlightTile(number);
+function updateStudentBubblePosition() {
+  if (studentSpeechBubble.hidden || !movingStudent.getBoundingClientRect) {
+    return;
+  }
+
+  const classroomRect = classroom.getBoundingClientRect();
+  const studentRect = movingStudent.getBoundingClientRect();
+  const centerX =
+    studentRect.left - classroomRect.left + studentRect.width / 2;
+  const topY = studentRect.top - classroomRect.top + 8;
+
+  studentSpeechBubble.style.left = `${centerX}px`;
+  studentSpeechBubble.style.top = `${topY}px`;
+  studentSpeechBubble.dataset.side =
+    centerX > classroomRect.width * 0.58 ? "left" : "right";
 }
 
 async function animateStudentArrival() {
@@ -256,6 +325,7 @@ async function animateStudentArrival() {
   movingStudent.style.opacity = "1";
   await sleep(750);
   movingStudent.classList.remove("is-arriving");
+  updateStudentBubblePosition();
 }
 
 async function animateStudentTurn(facing) {
@@ -263,6 +333,7 @@ async function animateStudentTurn(facing) {
   setStudentFacing(facing);
   await sleep(760);
   movingStudent.classList.remove("is-turning");
+  updateStudentBubblePosition();
 }
 
 async function animateStudentStep(nextPosition, isBackward) {
@@ -271,6 +342,7 @@ async function animateStudentStep(nextPosition, isBackward) {
 
   currentPosition = nextPosition;
   movingStudent.style.left = `${getStudentLeft(currentPosition)}px`;
+  window.requestAnimationFrame(updateStudentBubblePosition);
 
   await sleep(620);
 
@@ -282,168 +354,457 @@ async function animateStudentStep(nextPosition, isBackward) {
   await sleep(90);
 }
 
-async function runSimulation() {
-  if (isRunning) {
-    return;
-  }
-
+function getExerciseConfig() {
   const firstNumber = Number(firstNumberInput.value);
   const operator = operatorInput.value;
   const secondNumber = Number(secondNumberInput.value);
 
   if (!isValidInteger(firstNumber) || !isValidInteger(secondNumber)) {
     setMessage("error.integer");
-    return;
+    return null;
   }
 
-  const result = calculateResult(firstNumber, operator, secondNumber);
+  const result = calculateResult(
+    firstNumber,
+    operator,
+    secondNumber
+  );
 
   if (Math.abs(result) > 60) {
     setMessage("error.range");
-    return;
+    return null;
   }
 
-  const exercise = formatExercise(firstNumber, operator, secondNumber);
-
-  isRunning = true;
-  startButton.disabled = true;
-  boardResult.textContent = "";
-
-  updateBoardExercise();
-  createNumberLine(firstNumber, result);
-
-  setMessage("message.exercise", {
-    exercise: leftToRightIsolate(exercise)
-  });
-  setSpeech("speech.first", { first: firstNumber });
-
-  await sleep(1500);
-
-  standingStudent.style.opacity = "0";
-  placeStudentOnTile(firstNumber);
-  setMessage("message.walkTo", { first: firstNumber });
-
-  await animateStudentArrival();
-
-  setSpeech("speech.position", { first: firstNumber });
-
-  await sleep(900);
-
-  const turnDirection = {
-    i18n: operator === "+" ? "direction.right" : "direction.left"
-  };
-  const facing = operator === "+" ? "right" : "left";
-
-  setSpeech("speech.turn", {
+  return {
+    firstNumber,
     operator,
-    direction: turnDirection
-  });
-  setMessage("message.turn", { direction: turnDirection });
-
-  await animateStudentTurn(facing);
-  await sleep(600);
-
-  const numberOfSteps = Math.abs(secondNumber);
-  const walkingDirection = {
-    i18n:
-      secondNumber >= 0
-        ? "direction.forward"
-        : "direction.backward"
+    secondNumber,
+    result,
+    exercise: formatExercise(firstNumber, operator, secondNumber),
+    facing: operator === "+" ? "right" : "left",
+    turnDirection: {
+      i18n: operator === "+" ? "direction.right" : "direction.left"
+    },
+    walkingDirection: {
+      i18n:
+        secondNumber >= 0
+          ? "direction.forward"
+          : "direction.backward"
+    },
+    numberOfSteps: Math.abs(secondNumber)
   };
-
-  setSpeech("speech.walk", {
-    second: secondNumber,
-    steps: numberOfSteps,
-    direction: walkingDirection
-  });
-  setMessage("message.walk", {
-    steps: numberOfSteps,
-    direction: walkingDirection
-  });
-
-  await sleep(1300);
-
-  const directionOnLine =
-    operator === "+"
-      ? Math.sign(secondNumber)
-      : -Math.sign(secondNumber);
-
-  if (numberOfSteps === 0) {
-    await sleep(700);
-  }
-
-  for (
-    let step = 0;
-    step < numberOfSteps;
-    step += 1
-  ) {
-    const oldTile = getTile(currentPosition);
-
-    if (oldTile) {
-      oldTile.classList.remove("active");
-      oldTile.classList.add("visited");
-    }
-
-    const nextPosition = currentPosition + directionOnLine;
-    await animateStudentStep(nextPosition, secondNumber < 0);
-
-    const currentTile = getTile(currentPosition);
-
-    if (currentTile) {
-      currentTile.classList.add("active");
-      currentTile.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest"
-      });
-    }
-
-    await sleep(180);
-  }
-
-  setSpeech("speech.question");
-  setMessage("message.arrived", { position: currentPosition });
-
-  await sleep(1300);
-
-  const completedExercise = `${exercise} = ${currentPosition}`;
-  boardResult.textContent = completedExercise;
-  setSpeech("speech.answer", { position: currentPosition });
-
-  isRunning = false;
-  startButton.disabled = false;
 }
 
-function resetSimulator() {
-  if (isRunning) {
+function prepareExercise() {
+  const nextConfig = getExerciseConfig();
+
+  if (!nextConfig) {
+    return false;
+  }
+
+  exerciseConfig = nextConfig;
+  updateBoardExercise();
+  createNumberLine(
+    exerciseConfig.firstNumber,
+    exerciseConfig.result
+  );
+  boardResult.textContent = "";
+  return true;
+}
+
+function updatePlaybackControls() {
+  playbackProgress.max = String(LAST_TIMELINE_STEP);
+  playbackProgress.value = String(currentTimelineStep);
+  playbackCounter.textContent =
+    `${currentTimelineStep} / ${LAST_TIMELINE_STEP}`;
+
+  previousStepButton.disabled = currentTimelineStep === 0;
+  nextStepButton.disabled =
+    currentTimelineStep === LAST_TIMELINE_STEP;
+  pauseButton.disabled = !isPlaying || isPaused;
+  stopButton.disabled = currentTimelineStep === 0 && !isPlaying;
+  startButton.disabled = isPlaying;
+
+  firstNumberInput.disabled = isPlaying;
+  operatorInput.disabled = isPlaying;
+  secondNumberInput.disabled = isPlaying;
+
+  playButton.setAttribute("aria-pressed", String(isPlaying && !isPaused));
+  pauseButton.setAttribute("aria-pressed", String(isPaused));
+  movingStudent.classList.toggle("is-paused", isPaused);
+}
+
+async function waitForPlayback(milliseconds, generation) {
+  let elapsed = 0;
+
+  while (elapsed < milliseconds) {
+    if (generation !== playbackGeneration) {
+      return false;
+    }
+
+    if (isPaused) {
+      await sleep(80);
+      continue;
+    }
+
+    const interval = Math.min(80, milliseconds - elapsed);
+    await sleep(interval);
+    elapsed += interval;
+  }
+
+  return generation === playbackGeneration;
+}
+
+function getSpeechReplacements(config) {
+  return {
+    first: formatSpeechNumber(config.firstNumber),
+    operator: leftToRightIsolate(config.operator),
+    second: formatSpeechNumber(config.secondNumber),
+    steps: formatSpeechNumber(config.numberOfSteps),
+    position: formatSpeechNumber(config.result),
+    direction: config.walkingDirection
+  };
+}
+
+async function renderTimelineStep(
+  step,
+  { animate = false, generation = playbackGeneration } = {}
+) {
+  if (!exerciseConfig) {
+    return false;
+  }
+
+  const config = exerciseConfig;
+  const speech = getSpeechReplacements(config);
+  currentTimelineStep = Math.max(
+    0,
+    Math.min(LAST_TIMELINE_STEP, step)
+  );
+  boardResult.textContent = "";
+  clearStudentMotion();
+  setStudentSpeech(null);
+
+  if (currentTimelineStep <= 1) {
+    standingStudent.style.opacity = "1";
+    movingStudent.style.opacity = "0";
+    placeStudentOnTile(config.firstNumber, "front");
+    clearHighlights();
+  } else {
+    standingStudent.style.opacity = "0";
+    movingStudent.style.opacity = "1";
+  }
+
+  switch (currentTimelineStep) {
+    case 0:
+      setTeacherSpeech("speech.initial");
+      setMessage("message.initial");
+      break;
+
+    case 1:
+      setTeacherSpeech("speech.first", {
+        first: speech.first
+      });
+      setMessage("message.exercise", {
+        exercise: leftToRightIsolate(config.exercise)
+      });
+      break;
+
+    case 2:
+      placeStudentOnTile(config.firstNumber, "front");
+      highlightTile(config.firstNumber);
+      setTeacherSpeech("speech.first", {
+        first: speech.first
+      });
+      setStudentSpeech("student.go", {
+        first: speech.first
+      });
+      setMessage("message.walkTo", {
+        first: speech.first
+      });
+      if (animate) {
+        await animateStudentArrival();
+      }
+      break;
+
+    case 3:
+      placeStudentOnTile(config.firstNumber, "front");
+      highlightTile(config.firstNumber);
+      setTeacherSpeech("speech.turn", {
+        operator: speech.operator,
+        direction: config.turnDirection
+      });
+      setMessage("message.turn", {
+        direction: config.turnDirection
+      });
+      break;
+
+    case 4:
+      placeStudentOnTile(config.firstNumber, "front");
+      highlightTile(config.firstNumber);
+      setTeacherSpeech("speech.turn", {
+        operator: speech.operator,
+        direction: config.turnDirection
+      });
+      setStudentSpeech("student.turn", {
+        direction: config.turnDirection
+      });
+      setMessage("message.turn", {
+        direction: config.turnDirection
+      });
+      if (animate) {
+        await animateStudentTurn(config.facing);
+      } else {
+        setStudentFacing(config.facing);
+      }
+      break;
+
+    case 5:
+      placeStudentOnTile(config.firstNumber, config.facing);
+      highlightTile(config.firstNumber);
+      setTeacherSpeech("speech.walk", {
+        second: speech.second,
+        steps: speech.steps,
+        direction: config.walkingDirection
+      });
+      setMessage("message.walk", {
+        steps: speech.steps,
+        direction: config.walkingDirection
+      });
+      break;
+
+    case 6: {
+      placeStudentOnTile(config.firstNumber, config.facing);
+      highlightTile(config.firstNumber);
+      setTeacherSpeech("speech.walk", {
+        second: speech.second,
+        steps: speech.steps,
+        direction: config.walkingDirection
+      });
+      setStudentSpeech("student.walk", {
+        steps: speech.steps,
+        direction: config.walkingDirection
+      });
+      setMessage("message.walk", {
+        steps: speech.steps,
+        direction: config.walkingDirection
+      });
+
+      if (animate) {
+        const directionOnLine =
+          config.operator === "+"
+            ? Math.sign(config.secondNumber)
+            : -Math.sign(config.secondNumber);
+
+        for (
+          let movementStep = 0;
+          movementStep < config.numberOfSteps;
+          movementStep += 1
+        ) {
+          if (generation !== playbackGeneration) {
+            return false;
+          }
+
+          const canContinue = await waitForPlayback(220, generation);
+          if (!canContinue) {
+            return false;
+          }
+
+          const oldTile = getTile(currentPosition);
+          if (oldTile) {
+            oldTile.classList.remove("active");
+            oldTile.classList.add("visited");
+          }
+
+          await animateStudentStep(
+            currentPosition + directionOnLine,
+            config.secondNumber < 0
+          );
+
+          highlightTile(currentPosition);
+        }
+      } else {
+        placeStudentOnTile(config.result, config.facing);
+        markPath(config.firstNumber, config.result);
+      }
+      break;
+    }
+
+    case 7:
+      placeStudentOnTile(config.result, config.facing);
+      markPath(config.firstNumber, config.result);
+      setTeacherSpeech("speech.question");
+      setMessage("message.arrived", {
+        position: speech.position
+      });
+      break;
+
+    case 8:
+      placeStudentOnTile(config.result, config.facing);
+      markPath(config.firstNumber, config.result);
+      setTeacherSpeech("speech.question");
+      setStudentSpeech("student.answer", {
+        position: speech.position
+      });
+      setMessage("message.arrived", {
+        position: speech.position
+      });
+      boardResult.textContent =
+        `${config.exercise} = ${config.result}`;
+      break;
+
+    default:
+      break;
+  }
+
+  updatePlaybackControls();
+  updateStudentBubblePosition();
+  return generation === playbackGeneration;
+}
+
+function cancelPlayback() {
+  playbackGeneration += 1;
+  isPlaying = false;
+  isPaused = false;
+  updatePlaybackControls();
+}
+
+async function playTimeline() {
+  if (isPaused) {
+    isPaused = false;
+    updatePlaybackControls();
     return;
   }
+
+  if (isPlaying) {
+    return;
+  }
+
+  if (!exerciseConfig && !prepareExercise()) {
+    return;
+  }
+
+  if (currentTimelineStep >= LAST_TIMELINE_STEP) {
+    await renderTimelineStep(0);
+  }
+
+  isPlaying = true;
+  const generation = ++playbackGeneration;
+  updatePlaybackControls();
+
+  while (
+    generation === playbackGeneration &&
+    currentTimelineStep < LAST_TIMELINE_STEP
+  ) {
+    const canContinue = await waitForPlayback(520, generation);
+    if (!canContinue) {
+      return;
+    }
+
+    const rendered = await renderTimelineStep(
+      currentTimelineStep + 1,
+      { animate: true, generation }
+    );
+
+    if (!rendered) {
+      return;
+    }
+
+    const canAdvance = await waitForPlayback(1050, generation);
+    if (!canAdvance) {
+      return;
+    }
+  }
+
+  if (generation === playbackGeneration) {
+    isPlaying = false;
+    isPaused = false;
+    updatePlaybackControls();
+  }
+}
+
+async function seekTimeline(step) {
+  cancelPlayback();
+
+  if (!exerciseConfig && !prepareExercise()) {
+    return;
+  }
+
+  await renderTimelineStep(step);
+}
+
+async function runSimulation() {
+  cancelPlayback();
+
+  if (!prepareExercise()) {
+    return;
+  }
+
+  await renderTimelineStep(0);
+  await playTimeline();
+}
+
+async function stopPlayback() {
+  cancelPlayback();
+
+  if (!exerciseConfig && !prepareExercise()) {
+    return;
+  }
+
+  await renderTimelineStep(0);
+}
+
+async function resetSimulator() {
+  cancelPlayback();
 
   firstNumberInput.value = 0;
   operatorInput.value = "+";
   secondNumberInput.value = 3;
+  exerciseConfig = null;
 
-  currentPosition = 0;
+  if (!prepareExercise()) {
+    return;
+  }
 
-  standingStudent.style.opacity = "1";
-  movingStudent.style.opacity = "0";
-  boardResult.textContent = "";
-  clearStudentMotion();
-  setStudentFacing("front");
-
-  setMessage("message.initial");
-  setSpeech("speech.initial");
-
-  updateBoardExercise();
-  createNumberLine(0, 3);
-  clearHighlights();
+  await renderTimelineStep(0);
 }
 
-firstNumberInput.addEventListener("input", updateBoardExercise);
-operatorInput.addEventListener("change", updateBoardExercise);
-secondNumberInput.addEventListener("input", updateBoardExercise);
+function handleExerciseInput() {
+  if (isPlaying) {
+    return;
+  }
+
+  exerciseConfig = null;
+  currentTimelineStep = 0;
+  boardResult.textContent = "";
+  setStudentSpeech(null);
+  updateBoardExercise();
+  updatePlaybackControls();
+}
+
+firstNumberInput.addEventListener("input", handleExerciseInput);
+operatorInput.addEventListener("change", handleExerciseInput);
+secondNumberInput.addEventListener("input", handleExerciseInput);
 startButton.addEventListener("click", runSimulation);
 resetButton.addEventListener("click", resetSimulator);
+playButton.addEventListener("click", playTimeline);
+pauseButton.addEventListener("click", () => {
+  if (!isPlaying) {
+    return;
+  }
+
+  isPaused = true;
+  updatePlaybackControls();
+});
+stopButton.addEventListener("click", stopPlayback);
+previousStepButton.addEventListener("click", () => {
+  seekTimeline(currentTimelineStep - 1);
+});
+nextStepButton.addEventListener("click", () => {
+  seekTimeline(currentTimelineStep + 1);
+});
+playbackProgress.addEventListener("input", () => {
+  seekTimeline(Number(playbackProgress.value));
+});
 
 languageButtons.forEach(button => {
   button.addEventListener("click", () => {
@@ -451,6 +812,8 @@ languageButtons.forEach(button => {
   });
 });
 
+numberLineArea.addEventListener("scroll", updateStudentBubblePosition);
+window.addEventListener("resize", updateStudentBubblePosition);
 window.addEventListener("signed-numbers:localechange", applyTranslations);
 
 createClassroomStudents();

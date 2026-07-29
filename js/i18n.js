@@ -83,6 +83,13 @@ const messages = {
     "controls.secondNumber": "המספר השני",
     "controls.start": "הפעלת התרגיל",
     "controls.reset": "איפוס",
+    "playback.aria": "בקרת הפעלה",
+    "playback.previous": "חזרה לשלב הקודם",
+    "playback.play": "הפעלה",
+    "playback.pause": "השהיה",
+    "playback.stop": "עצירה וחזרה להתחלה",
+    "playback.next": "מעבר לשלב הבא",
+    "playback.progress": "התקדמות בתרגיל",
     "classroom.aria": "הדמיית כיתה אינטראקטיבית",
     "classroom.clock": "שעון קיר",
     "classroom.window": "חלון כיתה",
@@ -98,20 +105,27 @@ const messages = {
     "error.range": "התוצאה רחוקה מדי עבור רצפת הכיתה.",
     "message.exercise": "התרגיל על הלוח הוא {exercise}.",
     "speech.first":
-      "המספר הראשון הוא {first}. לך לעמוד על הבלטה {first}.",
+      "המספר הראשון הוא {first}. לך לעמוד על הבלטה שכתוב עליה {first}.",
+    "student.go":
+      "אוקיי, אני הולך לבלטה שכתוב עליה {first}.",
     "message.walkTo": "התלמיד הולך אל הבלטה {first}.",
     "speech.position": "עכשיו אתה עומד על {first}.",
     "speech.turn":
       "הסימן {operator} אומר להסתובב 90 מעלות {direction}.",
+    "student.turn":
+      "עכשיו אני פונה {direction} 90 מעלות.",
     "message.turn": "התלמיד מסתובב 90 מעלות {direction}.",
     "direction.right": "ימינה",
     "direction.left": "שמאלה",
     "speech.walk":
       "המספר השני הוא {second}. לך {steps} צעדים {direction}.",
+    "student.walk":
+      "עכשיו אני צועד {direction} {steps} צעדים.",
     "message.walk": "התלמיד הולך {steps} צעדים {direction}.",
     "direction.forward": "קדימה",
     "direction.backward": "אחורה",
     "speech.question": "על איזו בלטה אתה עומד עכשיו?",
+    "student.answer": "אני עומד על הבלטה {position}.",
     "message.arrived": "התלמיד הגיע לבלטה {position}.",
     "speech.answer": "נכון. התשובה היא {position}."
   },
@@ -131,6 +145,13 @@ const messages = {
     "controls.secondNumber": "Second number",
     "controls.start": "Run exercise",
     "controls.reset": "Reset",
+    "playback.aria": "Playback controls",
+    "playback.previous": "Previous step",
+    "playback.play": "Play",
+    "playback.pause": "Pause",
+    "playback.stop": "Stop and return to the beginning",
+    "playback.next": "Next step",
+    "playback.progress": "Exercise progress",
     "classroom.aria": "Interactive classroom simulation",
     "classroom.clock": "Wall clock",
     "classroom.window": "Classroom window",
@@ -147,19 +168,23 @@ const messages = {
     "message.exercise": "The exercise on the board is {exercise}.",
     "speech.first":
       "The first number is {first}. Go and stand on tile {first}.",
+    "student.go": "Okay, I’m going to tile {first}.",
     "message.walkTo": "The student walks to tile {first}.",
     "speech.position": "You are now standing on {first}.",
     "speech.turn":
       "The {operator} sign means turn 90 degrees to the {direction}.",
+    "student.turn": "Now I turn 90 degrees to the {direction}.",
     "message.turn": "The student turns 90 degrees to the {direction}.",
     "direction.right": "right",
     "direction.left": "left",
     "speech.walk":
       "The second number is {second}. Take {steps} steps {direction}.",
+    "student.walk": "Now I take {steps} steps {direction}.",
     "message.walk": "The student takes {steps} steps {direction}.",
     "direction.forward": "forward",
     "direction.backward": "backward",
     "speech.question": "Which tile are you standing on now?",
+    "student.answer": "I am standing on tile {position}.",
     "message.arrived": "The student arrived at tile {position}.",
     "speech.answer": "Correct. The answer is {position}."
   }
