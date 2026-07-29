@@ -785,6 +785,19 @@ button:disabled {
   transform: translateY(-50%) rotate(45deg);
 }
 
+.teacher-speech-bubble.is-flipped {
+  right: calc(100% + 15px);
+  left: auto;
+}
+
+.teacher-speech-bubble.is-flipped::after {
+  right: -10px;
+  left: auto;
+  border-right: 2px solid #344955;
+  border-left: 0;
+  transform: translateY(-50%) rotate(-45deg);
+}
+
 .teacher-speech-bubble:empty {
   display: none;
 }

@@ -12,6 +12,7 @@ const studentSpeechBubble = document.getElementById(
   "studentSpeechBubble"
 );
 const classroom = document.querySelector(".classroom");
+const teacher = document.querySelector(".teacher");
 const standingStudent = document.getElementById("standingStudent");
 const movingStudent = document.getElementById("movingStudent");
 const numberLine = document.getElementById("numberLine");
@@ -32,7 +33,7 @@ const languageButtons = Array.from(
   document.querySelectorAll(".language-option")
 );
 
-const LAST_TIMELINE_STEP = 8;
+const LAST_TIMELINE_STEP = 9;
 const leftToRightIsolate = value => `\u2066${value}\u2069`;
 
 let tiles = [];
@@ -108,6 +109,10 @@ function setMessage(key, replacements = {}) {
 function setTeacherSpeech(key, replacements = {}) {
   teacherSpeechState = key ? { key, replacements } : null;
   renderState(speechBubble, teacherSpeechState);
+
+  if (teacherSpeechState) {
+    window.requestAnimationFrame(updateTeacherBubblePosition);
+  }
 }
 
 function setStudentSpeech(key, replacements = {}) {
@@ -312,6 +317,66 @@ function updateStudentBubblePosition() {
   studentSpeechBubble.style.left = `${centerX}px`;
   studentSpeechBubble.style.top = `${topY}px`;
   studentSpeechBubble.dataset.side = "left";
+
+  window.requestAnimationFrame(() => {
+    const bubbleRect = studentSpeechBubble.getBoundingClientRect();
+    const teacherRect = teacher.getBoundingClientRect();
+
+    if (
+      bubbleRect.left < classroomRect.left + 8 ||
+      rectanglesOverlap(bubbleRect, teacherRect, 10)
+    ) {
+      studentSpeechBubble.dataset.side = "right";
+    }
+  });
+}
+
+function rectanglesOverlap(firstRect, secondRect, padding = 0) {
+  return !(
+    firstRect.right + padding <= secondRect.left ||
+    firstRect.left >= secondRect.right + padding ||
+    firstRect.bottom + padding <= secondRect.top ||
+    firstRect.top >= secondRect.bottom + padding
+  );
+}
+
+function getVisibleStudentRect() {
+  const standingOpacity = Number.parseFloat(
+    window.getComputedStyle(standingStudent).opacity
+  );
+  const movingOpacity = Number.parseFloat(
+    window.getComputedStyle(movingStudent).opacity
+  );
+
+  if (movingOpacity > 0.1) {
+    return movingStudent.getBoundingClientRect();
+  }
+
+  if (standingOpacity > 0.1) {
+    return standingStudent.getBoundingClientRect();
+  }
+
+  return null;
+}
+
+function updateTeacherBubblePosition() {
+  if (!teacherSpeechState || !speechBubble.textContent) {
+    return;
+  }
+
+  speechBubble.classList.remove("is-flipped");
+
+  window.requestAnimationFrame(() => {
+    const studentRect = getVisibleStudentRect();
+    if (!studentRect) {
+      return;
+    }
+
+    const bubbleRect = speechBubble.getBoundingClientRect();
+    if (rectanglesOverlap(bubbleRect, studentRect, 10)) {
+      speechBubble.classList.add("is-flipped");
+    }
+  });
 }
 
 async function animateStudentArrival() {
@@ -660,12 +725,26 @@ async function renderTimelineStep(
         `${config.exercise} = ${config.result}`;
       break;
 
+    case 9:
+      placeStudentOnTile(config.result, config.facing);
+      markPath(config.firstNumber, config.result);
+      setTeacherSpeech("speech.answer", {
+        position: speech.position
+      });
+      setMessage("message.answer", {
+        position: speech.position
+      });
+      boardExercise.textContent =
+        `${config.exercise} = ${config.result}`;
+      break;
+
     default:
       break;
   }
 
   updatePlaybackControls();
   updateStudentBubblePosition();
+  window.requestAnimationFrame(updateTeacherBubblePosition);
   return generation === playbackGeneration;
 }
 
@@ -818,6 +897,7 @@ languageButtons.forEach(button => {
 
 numberLineArea.addEventListener("scroll", updateStudentBubblePosition);
 window.addEventListener("resize", updateStudentBubblePosition);
+window.addEventListener("resize", updateTeacherBubblePosition);
 window.addEventListener("signed-numbers:localechange", applyTranslations);
 
 createClassroomStudents();

@@ -131,7 +131,10 @@ const messages = {
     "speech.question": "על איזה אריח אתה עומד עכשיו?",
     "student.answer": "אני עומד על האריח {position}.",
     "message.arrived": "התלמיד הגיע לאריח {position}.",
-    "speech.answer": "נכון. התשובה היא {position}."
+    "speech.answer":
+      "נכון, ולכן תוצאת התרגיל היא {position}.",
+    "message.answer":
+      "המורה מסכם: תוצאת התרגיל היא {position}."
   },
   en: {
     "document.title":
@@ -195,7 +198,10 @@ const messages = {
     "speech.question": "Which tile are you standing on now?",
     "student.answer": "I am standing on tile {position}.",
     "message.arrived": "The student arrived at tile {position}.",
-    "speech.answer": "Correct. The answer is {position}."
+    "speech.answer":
+      "Correct, so the result of the exercise is {position}.",
+    "message.answer":
+      "The teacher concludes: the result of the exercise is {position}."
   }
 };
 
