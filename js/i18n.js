@@ -69,11 +69,12 @@ class I18n {
 const messages = {
   he: {
     "document.title":
-      "מספרים מכוונים — להרגיש דרך הגוף — Fundamatics",
+      "מספרים מכוונים — להרגיש את התרגיל דרך הגוף — Fundamatics",
     "document.description":
       "סימולטור אינטראקטיבי ללימוד חיבור וחיסור של מספרים מכוונים",
     "header.aria": "מספרים מכוונים מבית Fundamatics",
-    "header.title": "מספרים מכוונים — להרגיש דרך הגוף",
+    "header.title":
+      "מספרים מכוונים — להרגיש את התרגיל דרך הגוף",
     "header.subtitle":
       "סימולטור גופני ללימוד חיבור וחיסור של מספרים מכוונים",
     "header.home": "חזרה ל־Fundamatics",
@@ -138,11 +139,12 @@ const messages = {
   },
   en: {
     "document.title":
-      "Signed Numbers — Feel It Through Movement — Fundamatics",
+      "Signed Numbers — Feel the Exercise Through Movement — Fundamatics",
     "document.description":
       "An interactive simulator for learning addition and subtraction with signed numbers",
     "header.aria": "Signed Numbers by Fundamatics",
-    "header.title": "Signed Numbers — Feel It Through Movement",
+    "header.title":
+      "Signed Numbers — Feel the Exercise Through Movement",
     "header.subtitle":
       "A movement-based simulator for adding and subtracting signed numbers",
     "header.home": "Back to Fundamatics",
