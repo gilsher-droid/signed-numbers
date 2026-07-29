@@ -883,10 +883,11 @@ html[dir="ltr"] .speech-bubble::after {
   .controls {
     grid-area: controls;
     display: grid;
-    grid-template:
-      "first first operator operator second second" auto
-      "start start start reset reset reset" auto
-      / repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "first first operator operator second second"
+      "start start start reset reset reset";
     gap: 10px;
     margin: 0;
     padding: 14px;
