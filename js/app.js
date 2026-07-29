@@ -7,7 +7,6 @@ const startButton = document.getElementById("startButton");
 const resetButton = document.getElementById("resetButton");
 const messageBox = document.getElementById("message");
 const boardExercise = document.getElementById("boardExercise");
-const boardResult = document.getElementById("boardResult");
 const speechBubble = document.getElementById("speechBubble");
 const studentSpeechBubble = document.getElementById(
   "studentSpeechBubble"
@@ -408,7 +407,6 @@ function prepareExercise() {
     exerciseConfig.firstNumber,
     exerciseConfig.result
   );
-  boardResult.textContent = "";
   return true;
 }
 
@@ -480,7 +478,7 @@ async function renderTimelineStep(
     0,
     Math.min(LAST_TIMELINE_STEP, step)
   );
-  boardResult.textContent = "";
+  boardExercise.textContent = config.exercise;
   clearStudentMotion();
   setStudentSpeech(null);
 
@@ -648,7 +646,7 @@ async function renderTimelineStep(
       setMessage("message.arrived", {
         position: speech.position
       });
-      boardResult.textContent =
+      boardExercise.textContent =
         `${config.exercise} = ${config.result}`;
       break;
 
@@ -775,7 +773,6 @@ function handleExerciseInput() {
 
   exerciseConfig = null;
   currentTimelineStep = 0;
-  boardResult.textContent = "";
   setStudentSpeech(null);
   updateBoardExercise();
   updatePlaybackControls();
