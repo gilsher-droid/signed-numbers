@@ -1292,8 +1292,8 @@ button:disabled {
   .classroom {
     width: 100%;
     height: auto;
-    min-height: 845px;
-    grid-template-rows: 285px minmax(260px, 1fr) 300px;
+    min-height: 790px;
+    grid-template-rows: 285px minmax(260px, 1fr) 245px;
   }
 
   .front-wall {
@@ -1329,12 +1329,12 @@ button:disabled {
 
   .student-desks {
     top: auto;
-    bottom: 16px;
-    gap: 8px 18px;
+    bottom: 8px;
+    gap: 4px 18px;
   }
 
   .desk-unit {
-    height: 74px;
+    height: 70px;
   }
 
   .number-line-area {
