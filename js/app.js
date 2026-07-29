@@ -315,8 +315,7 @@ function updateStudentBubblePosition() {
 
   studentSpeechBubble.style.left = `${centerX}px`;
   studentSpeechBubble.style.top = `${topY}px`;
-  studentSpeechBubble.dataset.side =
-    centerX > classroomRect.width * 0.58 ? "left" : "right";
+  studentSpeechBubble.dataset.side = "left";
 }
 
 async function animateStudentArrival() {
