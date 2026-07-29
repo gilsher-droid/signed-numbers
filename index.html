@@ -21,7 +21,7 @@
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&amp;family=Montserrat:wght@600;700;800&amp;family=Noto+Sans+Hebrew:wght@400;600;700;800&amp;display=swap"
   />
-  <link rel="stylesheet" href="css/style.css?v=classroom-board-3" />
+  <link rel="stylesheet" href="css/style.css?v=dialogue-playback-4" />
 </head>
 
 <body>
@@ -183,16 +183,75 @@
               role="status"
               aria-live="polite"
             ></div>
-          </div>
 
-          <div
-            id="speechBubble"
-            class="speech-bubble"
-            aria-live="polite"
-          ></div>
+            <div
+              class="playback-controls"
+              role="group"
+              data-i18n-aria-label="playback.aria"
+            >
+              <button
+                id="previousStepButton"
+                class="playback-button"
+                type="button"
+                data-i18n-aria-label="playback.previous"
+              >
+                ⏮
+              </button>
+              <button
+                id="playButton"
+                class="playback-button playback-primary"
+                type="button"
+                data-i18n-aria-label="playback.play"
+              >
+                ▶
+              </button>
+              <button
+                id="pauseButton"
+                class="playback-button"
+                type="button"
+                data-i18n-aria-label="playback.pause"
+              >
+                ⏸
+              </button>
+              <button
+                id="stopButton"
+                class="playback-button"
+                type="button"
+                data-i18n-aria-label="playback.stop"
+              >
+                ⏹
+              </button>
+              <button
+                id="nextStepButton"
+                class="playback-button"
+                type="button"
+                data-i18n-aria-label="playback.next"
+              >
+                ⏭
+              </button>
+              <input
+                id="playbackProgress"
+                class="playback-progress"
+                type="range"
+                min="0"
+                max="8"
+                value="0"
+                step="1"
+                data-i18n-aria-label="playback.progress"
+              />
+              <output id="playbackCounter" class="playback-counter">
+                0 / 8
+              </output>
+            </div>
+          </div>
 
           <div class="front-people">
             <div class="person teacher">
+              <div
+                id="speechBubble"
+                class="speech-bubble teacher-speech-bubble"
+                aria-live="polite"
+              ></div>
               <div class="head"><div class="hair"></div></div>
               <div class="body"></div>
               <div class="legs"></div>
@@ -213,6 +272,13 @@
             </div>
           </div>
         </div>
+
+        <div
+          id="studentSpeechBubble"
+          class="speech-bubble student-speech-bubble"
+          aria-live="polite"
+          hidden
+        ></div>
 
         <div class="number-line-area">
           <div
@@ -252,7 +318,7 @@
     </main>
   </div>
 
-  <script src="js/i18n.js?v=bilingual-1"></script>
-  <script src="js/app.js?v=classroom-board-3"></script>
+  <script src="js/i18n.js?v=dialogue-playback-4"></script>
+  <script src="js/app.js?v=dialogue-playback-4"></script>
 </body>
 </html>

@@ -377,11 +377,59 @@ button:disabled {
   line-height: 1.25;
 }
 
+.playback-controls {
+  display: grid;
+  grid-template-columns: repeat(5, 34px) minmax(120px, 1fr) auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  direction: ltr;
+}
+
+.playback-button {
+  width: 34px;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  font-size: 0.86rem;
+  line-height: 1;
+}
+
+.playback-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.27);
+}
+
+.playback-primary {
+  background: var(--brand-purple);
+}
+
+.playback-progress {
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  accent-color: #ffe89a;
+  cursor: pointer;
+}
+
+.playback-counter {
+  min-width: 42px;
+  color: #f7fbf8;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 0.72rem;
+  direction: ltr;
+}
+
 .classroom {
   position: relative;
   display: grid;
-  grid-template-rows: 300px auto minmax(320px, 1fr);
-  min-height: 690px;
+  grid-template-rows: 285px minmax(260px, 1fr) 300px;
+  min-height: 845px;
   overflow: hidden;
   border: 8px solid #786048;
   border-radius: 22px;
@@ -393,7 +441,7 @@ button:disabled {
 
 .front-wall {
   position: relative;
-  height: 300px;
+  height: 285px;
   border-bottom: 8px solid #9f8c6e;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.15), transparent),
@@ -404,12 +452,12 @@ button:disabled {
   position: absolute;
   top: 14px;
   left: 50%;
-  width: min(760px, 68%);
-  height: 232px;
+  width: min(900px, 74%);
+  height: 260px;
   display: grid;
-  grid-template-rows: auto auto auto minmax(34px, auto);
-  gap: 7px;
-  padding: 10px 16px 12px;
+  grid-template-rows: auto auto auto minmax(32px, auto) auto;
+  gap: 6px;
+  padding: 9px 16px 10px;
   transform: translateX(-50%);
   border: 8px solid var(--board-frame);
   border-radius: 5px;
@@ -677,10 +725,6 @@ button:disabled {
 }
 
 .speech-bubble {
-  position: absolute;
-  inset-inline-end: 16px;
-  bottom: 18px;
-  width: clamp(160px, 22%, 195px);
   padding: 10px;
   border: 2px solid #344955;
   border-radius: 14px;
@@ -691,22 +735,67 @@ button:disabled {
   font-weight: 700;
 }
 
-.speech-bubble::after {
+.teacher-speech-bubble {
+  position: absolute;
+  right: calc(100% + 15px);
+  bottom: 16px;
+  width: 235px;
+  z-index: 40;
+}
+
+.teacher-speech-bubble::after {
   content: "";
   position: absolute;
-  inset-inline-start: -10px;
-  inset-inline-end: auto;
-  top: 50%;
+  right: -10px;
+  top: 56%;
   width: 18px;
   height: 18px;
-  border-inline-start: 2px solid #344955;
+  border-right: 2px solid #344955;
   border-bottom: 2px solid #344955;
   background: white;
   transform: translateY(-50%) rotate(-45deg);
 }
 
-html[dir="ltr"] .speech-bubble::after {
-  transform: translateY(-50%) rotate(45deg);
+.student-speech-bubble {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: min(250px, 30vw);
+  z-index: 60;
+  transform: translate(18px, -100%);
+  transition:
+    left 0.62s cubic-bezier(0.35, 0.05, 0.2, 1),
+    top 0.62s cubic-bezier(0.35, 0.05, 0.2, 1),
+    opacity 0.2s ease;
+}
+
+.student-speech-bubble[hidden] {
+  display: none;
+}
+
+.student-speech-bubble::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  bottom: 13px;
+  width: 18px;
+  height: 18px;
+  border-left: 2px solid #344955;
+  border-bottom: 2px solid #344955;
+  background: white;
+  transform: rotate(45deg);
+}
+
+.student-speech-bubble[data-side="left"] {
+  transform: translate(calc(-100% - 18px), -100%);
+}
+
+.student-speech-bubble[data-side="left"]::after {
+  right: -10px;
+  left: auto;
+  border-right: 2px solid #344955;
+  border-left: 0;
+  transform: rotate(-45deg);
 }
 
 .floor {
@@ -733,7 +822,8 @@ html[dir="ltr"] .speech-bubble::after {
 
 .student-desks {
   position: absolute;
-  top: 14px;
+  top: auto;
+  bottom: 16px;
   right: 25px;
   left: 25px;
   display: grid;
@@ -832,7 +922,7 @@ html[dir="ltr"] .speech-bubble::after {
   width: max-content;
   min-width: 100%;
   justify-content: center;
-  padding-top: 46px;
+  padding-top: 92px;
   direction: ltr;
 }
 
@@ -1000,6 +1090,15 @@ html[dir="ltr"] .speech-bubble::after {
   filter: saturate(0.92);
 }
 
+.moving-student.is-paused .student-pose,
+.moving-student.is-paused .head,
+.moving-student.is-paused .legs::before,
+.moving-student.is-paused .legs::after,
+.moving-student.is-paused .body::before,
+.moving-student.is-paused .body::after {
+  animation-play-state: paused;
+}
+
 @keyframes student-breathe {
   0%,
   100% {
@@ -1104,9 +1203,10 @@ html[dir="ltr"] .speech-bubble::after {
 @media (min-width: 901px) and (min-height: 700px) {
   #app {
     display: grid;
-    height: calc(100dvh - 28px);
+    min-height: calc(100dvh - 28px);
+    height: auto;
     margin: 14px auto;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
     gap: 18px;
   }
 
@@ -1135,7 +1235,7 @@ html[dir="ltr"] .speech-bubble::after {
 
   main {
     min-height: 0;
-    height: 100%;
+    height: auto;
     display: block;
   }
 
@@ -1191,9 +1291,9 @@ html[dir="ltr"] .speech-bubble::after {
 
   .classroom {
     width: 100%;
-    height: 100%;
-    min-height: 0;
-    grid-template-rows: 300px 150px minmax(0, 1fr);
+    height: auto;
+    min-height: 845px;
+    grid-template-rows: 285px minmax(260px, 1fr) 300px;
   }
 
   .front-wall {
@@ -1207,8 +1307,8 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .board {
-    width: min(760px, 68%);
-    height: 232px;
+    width: min(900px, 74%);
+    height: 260px;
   }
 
   .board-exercise {
@@ -1219,16 +1319,17 @@ html[dir="ltr"] .speech-bubble::after {
     gap: 34px;
   }
 
-  .speech-bubble {
+  .teacher-speech-bubble {
     bottom: 16px;
-    width: clamp(155px, 21%, 185px);
+    width: 220px;
     padding: 8px;
     font-size: 0.85rem;
     line-height: 1.35;
   }
 
   .student-desks {
-    top: 12px;
+    top: auto;
+    bottom: 16px;
     gap: 8px 18px;
   }
 
@@ -1264,11 +1365,11 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .classroom {
-    min-height: 750px;
+    min-height: 880px;
   }
 
   .board {
-    width: min(720px, 82%);
+    width: min(760px, 86%);
   }
 
   .student-desks {
@@ -1324,18 +1425,18 @@ html[dir="ltr"] .speech-bubble::after {
   }
 
   .classroom {
-    grid-template-rows: 320px auto minmax(320px, 1fr);
-    min-height: 880px;
+    grid-template-rows: 370px minmax(320px, 1fr) 510px;
+    min-height: 1200px;
   }
 
   .front-wall {
-    height: 320px;
+    height: 370px;
   }
 
   .board {
     top: 14px;
     width: calc(100% - 24px);
-    height: 244px;
+    height: 330px;
     padding-inline: 10px;
   }
 
@@ -1360,14 +1461,36 @@ html[dir="ltr"] .speech-bubble::after {
     font-size: 0.75rem;
   }
 
+  .playback-controls {
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .playback-button {
+    width: 100%;
+  }
+
+  .playback-progress {
+    grid-column: 1 / 5;
+  }
+
+  .playback-counter {
+    grid-column: 5;
+  }
+
   .front-people {
     gap: 22px;
   }
 
-  .speech-bubble {
-    inset-inline-end: 8px;
+  .teacher-speech-bubble {
+    right: calc(100% + 10px);
     bottom: 12px;
     width: 170px;
+    font-size: 0.82rem;
+  }
+
+  .student-speech-bubble {
+    width: min(210px, calc(100vw - 46px));
     font-size: 0.82rem;
   }
 
