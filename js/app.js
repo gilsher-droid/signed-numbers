@@ -14,9 +14,6 @@ const studentSpeechBubble = document.getElementById(
 const classroom = document.querySelector(".classroom");
 const standingStudent = document.getElementById("standingStudent");
 const movingStudent = document.getElementById("movingStudent");
-const movingDirectionArrow = movingStudent.querySelector(
-  ".direction-arrow"
-);
 const numberLine = document.getElementById("numberLine");
 const numberLineArea = document.querySelector(".number-line-area");
 const studentDesks = document.getElementById("studentDesks");
@@ -291,14 +288,6 @@ function clearStudentMotion() {
 
 function setStudentFacing(facing) {
   movingStudent.dataset.facing = facing;
-
-  const arrows = {
-    front: "↑",
-    right: "→",
-    left: "←"
-  };
-
-  movingDirectionArrow.textContent = arrows[facing] || arrows.front;
 }
 
 function placeStudentOnTile(number, facing = "front") {
@@ -564,6 +553,7 @@ async function renderTimelineStep(
         direction: config.turnDirection
       });
       setStudentSpeech("student.turn", {
+        operator: speech.operator,
         direction: config.turnDirection
       });
       setMessage("message.turn", {

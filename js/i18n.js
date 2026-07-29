@@ -108,16 +108,17 @@ const messages = {
     "error.range": "התוצאה רחוקה מדי עבור רצפת הכיתה.",
     "message.exercise": "התרגיל על הלוח הוא {exercise}.",
     "speech.first":
-      "המספר הראשון הוא {first}. לך לעמוד על הבלטה שכתוב עליה {first}.",
+      "המספר הראשון הוא {first}. לך לעמוד על האריח שמסומן {first}.",
     "student.go":
-      "אוקיי, אני הולך לבלטה שכתוב עליה {first}.",
-    "message.walkTo": "התלמיד הולך אל הבלטה {first}.",
+      "אוקיי, אני הולך לאריח שמסומן {first}.",
+    "message.walkTo": "התלמיד הולך אל האריח {first}.",
     "speech.position": "עכשיו אתה עומד על {first}.",
     "speech.turn":
-      "הסימן {operator} אומר להסתובב 90 מעלות {direction}.",
+      "הסימן {operator} אומר להסתובב 90 מעלות כך שהפנים פונות {direction}.",
     "student.turn":
-      "עכשיו אני פונה {direction} 90 מעלות.",
-    "message.turn": "התלמיד מסתובב 90 מעלות {direction}.",
+      "אני מסתובב 90 מעלות עם הפנים {direction}, כי אמרת {operator}.",
+    "message.turn":
+      "התלמיד מסתובב 90 מעלות ופניו פונות {direction}.",
     "direction.right": "ימינה",
     "direction.left": "שמאלה",
     "speech.walk":
@@ -127,9 +128,9 @@ const messages = {
     "message.walk": "התלמיד הולך {steps} צעדים {direction}.",
     "direction.forward": "קדימה",
     "direction.backward": "אחורה",
-    "speech.question": "על איזו בלטה אתה עומד עכשיו?",
-    "student.answer": "אני עומד על הבלטה {position}.",
-    "message.arrived": "התלמיד הגיע לבלטה {position}.",
+    "speech.question": "על איזה אריח אתה עומד עכשיו?",
+    "student.answer": "אני עומד על האריח {position}.",
+    "message.arrived": "התלמיד הגיע לאריח {position}.",
     "speech.answer": "נכון. התשובה היא {position}."
   },
   en: {
@@ -178,9 +179,11 @@ const messages = {
     "message.walkTo": "The student walks to tile {first}.",
     "speech.position": "You are now standing on {first}.",
     "speech.turn":
-      "The {operator} sign means turn 90 degrees to the {direction}.",
-    "student.turn": "Now I turn 90 degrees to the {direction}.",
-    "message.turn": "The student turns 90 degrees to the {direction}.",
+      "The {operator} sign means turn 90 degrees so your face points {direction}.",
+    "student.turn":
+      "I turn 90 degrees with my face pointing {direction}, because you said {operator}.",
+    "message.turn":
+      "The student turns 90 degrees and faces {direction}.",
     "direction.right": "right",
     "direction.left": "left",
     "speech.walk":
