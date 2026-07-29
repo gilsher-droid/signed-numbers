@@ -158,6 +158,7 @@ function applyTranslations() {
   renderState(speechBubble, teacherSpeechState);
   renderState(studentSpeechBubble, studentSpeechState);
   updateStudentBubblePosition();
+  window.requestAnimationFrame(updateTeacherBubblePosition);
 }
 
 function updateBoardExercise() {
