@@ -404,7 +404,14 @@ button:disabled {
 
 .playback-controls {
   display: grid;
-  grid-template-columns: auto repeat(4, 34px) minmax(120px, 1fr) auto;
+  grid-template-columns:
+    auto
+    34px
+    minmax(70px, auto)
+    34px
+    minmax(120px, 1fr)
+    auto;
+  grid-template-areas: "mode previous primary pause progress counter";
   align-items: center;
   justify-content: center;
   gap: 6px;
@@ -418,6 +425,7 @@ html[data-playback-mode="auto"] #nextStepButton {
 }
 
 .playback-mode-switch {
+  grid-area: mode;
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -426,6 +434,19 @@ html[data-playback-mode="auto"] #nextStepButton {
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.1);
   direction: rtl;
+}
+
+#previousStepButton {
+  grid-area: previous;
+}
+
+#playButton,
+#nextStepButton {
+  grid-area: primary;
+}
+
+#pauseButton {
+  grid-area: pause;
 }
 
 .playback-mode-option {
@@ -478,6 +499,7 @@ html[data-playback-mode="auto"] #nextStepButton {
 }
 
 .playback-progress {
+  grid-area: progress;
   width: 100%;
   min-height: 24px;
   padding: 0;
@@ -489,6 +511,7 @@ html[data-playback-mode="auto"] #nextStepButton {
 }
 
 .playback-counter {
+  grid-area: counter;
   min-width: 42px;
   color: #f7fbf8;
   font-family: "Manrope", Arial, sans-serif;
@@ -851,9 +874,10 @@ html[data-playback-mode="auto"] #nextStepButton {
 
 .teacher-speech-bubble {
   position: absolute;
+  top: 0;
   right: auto;
-  left: calc(100% + 15px);
-  bottom: 16px;
+  left: 0;
+  bottom: auto;
   width: 235px;
   z-index: 40;
 }
@@ -861,27 +885,25 @@ html[data-playback-mode="auto"] #nextStepButton {
 .teacher-speech-bubble::after {
   content: "";
   position: absolute;
-  right: auto;
-  left: -10px;
   top: 56%;
   width: 18px;
   height: 18px;
+  background: white;
+}
+
+.teacher-speech-bubble[data-side="right"]::after {
+  right: auto;
+  left: -10px;
   border-left: 2px solid #344955;
   border-bottom: 2px solid #344955;
-  background: white;
   transform: translateY(-50%) rotate(45deg);
 }
 
-.teacher-speech-bubble.is-flipped {
-  right: calc(100% + 15px);
-  left: auto;
-}
-
-.teacher-speech-bubble.is-flipped::after {
+.teacher-speech-bubble[data-side="left"]::after {
   right: -10px;
   left: auto;
   border-right: 2px solid #344955;
-  border-left: 0;
+  border-bottom: 2px solid #344955;
   transform: translateY(-50%) rotate(-45deg);
 }
 
@@ -895,11 +917,13 @@ html[data-playback-mode="auto"] #nextStepButton {
   left: 0;
   width: min(250px, 30vw);
   z-index: 60;
-  transform: translate(18px, -100%);
   transition:
     left 0.62s cubic-bezier(0.35, 0.05, 0.2, 1),
-    top 0.62s cubic-bezier(0.35, 0.05, 0.2, 1),
     opacity 0.2s ease;
+}
+
+.speech-bubble.is-positioning {
+  transition: none;
 }
 
 .student-speech-bubble[hidden] {
@@ -919,16 +943,25 @@ html[data-playback-mode="auto"] #nextStepButton {
   transform: rotate(45deg);
 }
 
-.student-speech-bubble[data-side="left"] {
-  transform: translate(calc(-100% - 18px), -100%);
-}
-
 .student-speech-bubble[data-side="left"]::after {
   right: -10px;
   left: auto;
   border-right: 2px solid #344955;
   border-left: 0;
   transform: rotate(-45deg);
+}
+
+.teacher-speech-bubble[data-side="docked"]::after,
+.student-speech-bubble[data-side="docked"]::after {
+  top: -10px;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  border-top: 2px solid #344955;
+  border-left: 2px solid #344955;
+  border-right: 0;
+  border-bottom: 0;
+  transform: translateX(-50%) rotate(45deg);
 }
 
 .floor {
@@ -1055,6 +1088,7 @@ html[data-playback-mode="auto"] #nextStepButton {
   width: max-content;
   min-width: 100%;
   justify-content: center;
+  justify-content: safe center;
   padding-top: 92px;
   direction: ltr;
 }
@@ -1691,7 +1725,6 @@ html[data-playback-mode="auto"] #nextStepButton {
   }
 
   .teacher-speech-bubble {
-    bottom: 16px;
     width: 220px;
     padding: 8px;
     font-size: 0.85rem;
@@ -1796,8 +1829,8 @@ html[data-playback-mode="auto"] #nextStepButton {
   }
 
   .classroom {
-    grid-template-rows: 370px minmax(320px, 1fr) 510px;
-    min-height: 1200px;
+    grid-template-rows: 370px minmax(370px, 1fr) 510px;
+    min-height: 1250px;
   }
 
   .front-wall {
@@ -1833,12 +1866,15 @@ html[data-playback-mode="auto"] #nextStepButton {
   }
 
   .playback-controls {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr minmax(90px, 1.35fr) 1fr auto;
     grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "mode mode mode mode"
+      "previous primary pause counter"
+      "progress progress progress progress";
   }
 
   .playback-mode-switch {
-    grid-column: 1 / -1;
     justify-content: center;
   }
 
@@ -1850,29 +1886,22 @@ html[data-playback-mode="auto"] #nextStepButton {
     min-width: 0;
   }
 
-  .playback-progress {
-    grid-column: 1 / 4;
-  }
-
-  .playback-counter {
-    grid-column: 4;
-  }
-
   .front-people {
     gap: 22px;
   }
 
   .teacher-speech-bubble {
-    right: auto;
-    left: calc(100% + 10px);
-    bottom: 12px;
-    width: 170px;
+    width: calc(100% - 32px);
+    max-width: 330px;
     font-size: 0.82rem;
+    line-height: 1.35;
   }
 
   .student-speech-bubble {
-    width: min(210px, calc(100vw - 46px));
+    width: calc(100% - 32px);
+    max-width: 330px;
     font-size: 0.82rem;
+    line-height: 1.35;
   }
 
   .student-desks {

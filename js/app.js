@@ -206,6 +206,7 @@ function setTeacherSpeech(key, replacements = {}) {
   renderState(speechBubble, teacherSpeechState);
 
   if (teacherSpeechState) {
+    speechBubble.classList.add("is-positioning");
     window.requestAnimationFrame(updateTeacherBubblePosition);
   }
 }
@@ -220,6 +221,7 @@ function setStudentSpeech(key, replacements = {}) {
   studentSpeechBubble.hidden = !studentSpeechState;
 
   if (studentSpeechState) {
+    studentSpeechBubble.classList.add("is-positioning");
     window.requestAnimationFrame(updateStudentBubblePosition);
   }
 }
@@ -435,6 +437,48 @@ function placeStudentOnTile(number, facing = "front") {
   window.requestAnimationFrame(updateStudentBubblePosition);
 }
 
+function clamp(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
+
+function isCompactClassroom() {
+  return classroom.clientWidth <= 650;
+}
+
+function positionDockedBubble(bubble) {
+  const classroomRect = classroom.getBoundingClientRect();
+  const numberLineRect = numberLineArea.getBoundingClientRect();
+  const bubbleWidth = bubble.offsetWidth;
+  const bubbleHeight = bubble.offsetHeight;
+  const horizontalPadding = 14;
+  const maximumLeft = Math.max(
+    horizontalPadding,
+    classroomRect.width - bubbleWidth - horizontalPadding
+  );
+  const left = clamp(
+    (classroomRect.width - bubbleWidth) / 2,
+    horizontalPadding,
+    maximumLeft
+  );
+  const top =
+    numberLineRect.bottom -
+    classroomRect.top -
+    bubbleHeight -
+    16;
+
+  bubble.dataset.side = "docked";
+  bubble.style.left = `${left}px`;
+  bubble.style.top = `${top}px`;
+}
+
+function finishBubblePositioning(bubble) {
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      bubble.classList.remove("is-positioning");
+    });
+  });
+}
+
 function updateStudentBubblePosition() {
   if (studentSpeechBubble.hidden || !movingStudent.getBoundingClientRect) {
     return;
@@ -442,25 +486,46 @@ function updateStudentBubblePosition() {
 
   const classroomRect = classroom.getBoundingClientRect();
   const studentRect = movingStudent.getBoundingClientRect();
+  const bubbleWidth = studentSpeechBubble.offsetWidth;
+  const bubbleHeight = studentSpeechBubble.offsetHeight;
+
+  if (isCompactClassroom()) {
+    positionDockedBubble(studentSpeechBubble);
+    finishBubblePositioning(studentSpeechBubble);
+    return;
+  }
+
+  const horizontalGap = 18;
+  const padding = 10;
   const centerX =
     studentRect.left - classroomRect.left + studentRect.width / 2;
-  const topY = studentRect.top - classroomRect.top + 8;
+  const leftCandidate = centerX - horizontalGap - bubbleWidth;
+  const rightCandidate = centerX + horizontalGap;
+  const teacherRect = teacher.getBoundingClientRect();
+  const leftViewportRect = {
+    left: classroomRect.left + leftCandidate,
+    right: classroomRect.left + leftCandidate + bubbleWidth,
+    top: studentRect.top - bubbleHeight + 8,
+    bottom: studentRect.top + 8
+  };
+  const canUseLeft =
+    leftCandidate >= padding &&
+    !rectanglesOverlap(leftViewportRect, teacherRect, 10);
+  const maximumLeft = classroomRect.width - bubbleWidth - padding;
+  const chosenLeft = canUseLeft ? leftCandidate : rightCandidate;
 
-  studentSpeechBubble.style.left = `${centerX}px`;
-  studentSpeechBubble.style.top = `${topY}px`;
-  studentSpeechBubble.dataset.side = "left";
-
-  window.requestAnimationFrame(() => {
-    const bubbleRect = studentSpeechBubble.getBoundingClientRect();
-    const teacherRect = teacher.getBoundingClientRect();
-
-    if (
-      bubbleRect.left < classroomRect.left + 8 ||
-      rectanglesOverlap(bubbleRect, teacherRect, 10)
-    ) {
-      studentSpeechBubble.dataset.side = "right";
-    }
-  });
+  studentSpeechBubble.dataset.side = canUseLeft ? "left" : "right";
+  studentSpeechBubble.style.left = `${clamp(
+    chosenLeft,
+    padding,
+    maximumLeft
+  )}px`;
+  studentSpeechBubble.style.top = `${clamp(
+    studentRect.top - classroomRect.top - bubbleHeight + 8,
+    padding,
+    classroomRect.height - bubbleHeight - padding
+  )}px`;
+  finishBubblePositioning(studentSpeechBubble);
 }
 
 function rectanglesOverlap(firstRect, secondRect, padding = 0) {
@@ -496,19 +561,52 @@ function updateTeacherBubblePosition() {
     return;
   }
 
-  speechBubble.classList.remove("is-flipped");
+  if (isCompactClassroom()) {
+    positionDockedBubble(speechBubble);
+    finishBubblePositioning(speechBubble);
+    return;
+  }
 
-  window.requestAnimationFrame(() => {
-    const studentRect = getVisibleStudentRect();
-    if (!studentRect) {
-      return;
-    }
+  const classroomRect = classroom.getBoundingClientRect();
+  const teacherRect = teacher.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+  const studentRect = getVisibleStudentRect();
+  const bubbleWidth = speechBubble.offsetWidth;
+  const bubbleHeight = speechBubble.offsetHeight;
+  const horizontalGap = 15;
+  const padding = 10;
+  const rightCandidate =
+    teacherRect.right - classroomRect.left + horizontalGap;
+  const leftCandidate =
+    teacherRect.left - classroomRect.left - bubbleWidth - horizontalGap;
+  const rightViewportRect = {
+    left: classroomRect.left + rightCandidate,
+    right: classroomRect.left + rightCandidate + bubbleWidth,
+    top: teacherRect.bottom - bubbleHeight - 12,
+    bottom: teacherRect.bottom - 12
+  };
+  const canUseRight =
+    rightCandidate + bubbleWidth <= classroomRect.width - padding &&
+    !rectanglesOverlap(rightViewportRect, studentRect, 10);
+  const maximumLeft = classroomRect.width - bubbleWidth - padding;
+  const chosenLeft = canUseRight ? rightCandidate : leftCandidate;
+  const minimumTop = Math.max(
+    padding,
+    boardRect.bottom - classroomRect.top + 8
+  );
 
-    const bubbleRect = speechBubble.getBoundingClientRect();
-    if (rectanglesOverlap(bubbleRect, studentRect, 10)) {
-      speechBubble.classList.add("is-flipped");
-    }
-  });
+  speechBubble.dataset.side = canUseRight ? "right" : "left";
+  speechBubble.style.left = `${clamp(
+    chosenLeft,
+    padding,
+    maximumLeft
+  )}px`;
+  speechBubble.style.top = `${clamp(
+    teacherRect.bottom - classroomRect.top - bubbleHeight - 12,
+    minimumTop,
+    classroomRect.height - bubbleHeight - padding
+  )}px`;
+  finishBubblePositioning(speechBubble);
 }
 
 async function animateStudentArrival(generation) {
@@ -1218,6 +1316,7 @@ window.addEventListener("resize", updateStudentBubblePosition);
 window.addEventListener("resize", updateTeacherBubblePosition);
 window.addEventListener("signed-numbers:localechange", applyTranslations);
 
+classroom.appendChild(speechBubble);
 createClassroomStudents();
 resetSimulator();
 applyTranslations();
