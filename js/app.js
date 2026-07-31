@@ -5,8 +5,11 @@ const operatorInput = document.getElementById("operator");
 const secondNumberInput = document.getElementById("secondNumber");
 const startButton = document.getElementById("startButton");
 const resetButton = document.getElementById("resetButton");
+const randomButton = document.getElementById("randomButton");
+const soundToggleButton = document.getElementById("soundToggleButton");
 const messageBox = document.getElementById("message");
 const boardExercise = document.getElementById("boardExercise");
+const board = document.querySelector(".board");
 const speechBubble = document.getElementById("speechBubble");
 const studentSpeechBubble = document.getElementById(
   "studentSpeechBubble"
@@ -26,6 +29,14 @@ const pauseButton = document.getElementById("pauseButton");
 const nextStepButton = document.getElementById("nextStepButton");
 const playbackProgress = document.getElementById("playbackProgress");
 const playbackCounter = document.getElementById("playbackCounter");
+const completionActions = document.getElementById("completionActions");
+const newExerciseButton = document.getElementById("newExerciseButton");
+const completionRandomButton = document.getElementById(
+  "completionRandomButton"
+);
+const replayButton = document.getElementById("replayButton");
+const turnIndicator = document.getElementById("turnIndicator");
+const stepCounter = document.getElementById("stepCounter");
 const playbackModeButtons = Array.from(
   document.querySelectorAll("[data-playback-mode]")
 );
@@ -43,7 +54,11 @@ let currentTimelineStep = 0;
 let playbackGeneration = 0;
 let isPlaying = false;
 let isPaused = false;
-let playbackMode = "auto";
+let isTransitioning = false;
+let playbackMode = "manual";
+let soundEnabled = false;
+let audioContext = null;
+let randomPatternIndex = 0;
 let exerciseConfig = null;
 let messageState = null;
 let teacherSpeechState = null;
@@ -75,6 +90,86 @@ function calculateResult(firstNumber, operator, secondNumber) {
   return operator === "+"
     ? firstNumber + secondNumber
     : firstNumber - secondNumber;
+}
+
+function randomInteger(minimum, maximum) {
+  return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+}
+
+function createRandomExercise() {
+  const patterns = [
+    { operator: "+", secondSign: 1 },
+    { operator: "+", secondSign: -1 },
+    { operator: "-", secondSign: 1 },
+    { operator: "-", secondSign: -1 }
+  ];
+  const pattern = patterns[randomPatternIndex % patterns.length];
+  randomPatternIndex += 1;
+
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const firstNumber = randomInteger(-10, 10);
+    const magnitude =
+      randomPatternIndex % 9 === 0 ? 0 : randomInteger(1, 10);
+    const secondNumber = magnitude * pattern.secondSign;
+    const result = calculateResult(
+      firstNumber,
+      pattern.operator,
+      secondNumber
+    );
+
+    if (Math.abs(result) <= 10) {
+      return {
+        firstNumber,
+        operator: pattern.operator,
+        secondNumber
+      };
+    }
+  }
+
+  return { firstNumber: 0, operator: pattern.operator, secondNumber: 0 };
+}
+
+function getAudioContext() {
+  if (!soundEnabled) {
+    return null;
+  }
+
+  if (!audioContext) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioContext = AudioContext ? new AudioContext() : null;
+  }
+
+  if (audioContext?.state === "suspended") {
+    audioContext.resume().catch(() => {});
+  }
+
+  return audioContext;
+}
+
+function playTone({ frequency = 440, duration = 0.08, volume = 0.025 }) {
+  const context = getAudioContext();
+  if (!context) {
+    return;
+  }
+
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  const now = context.currentTime;
+
+  oscillator.frequency.setValueAtTime(frequency, now);
+  gain.gain.setValueAtTime(volume, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(now);
+  oscillator.stop(now + duration);
+}
+
+function updateSoundControl() {
+  soundToggleButton.textContent = i18n.t(
+    soundEnabled ? "sound.on" : "sound.off"
+  );
+  soundToggleButton.setAttribute("aria-pressed", String(soundEnabled));
 }
 
 function resolveReplacements(replacements = {}) {
@@ -157,6 +252,8 @@ function applyTranslations() {
   renderState(messageBox, messageState);
   renderState(speechBubble, teacherSpeechState);
   renderState(studentSpeechBubble, studentSpeechState);
+  updateSoundControl();
+  updatePlaybackControls();
   updateStudentBubblePosition();
   window.requestAnimationFrame(updateTeacherBubblePosition);
 }
@@ -166,10 +263,42 @@ function updateBoardExercise() {
   const operator = operatorInput.value;
   const secondNumber = Number(secondNumberInput.value);
 
-  boardExercise.textContent = formatExercise(
-    firstNumber,
+  renderBoardExpression({ firstNumber, operator, secondNumber });
+}
+
+function renderBoardExpression(
+  { firstNumber, operator, secondNumber, result = null },
+  focusedPart = null
+) {
+  const parts = {
+    first: String(firstNumber),
     operator,
-    secondNumber
+    second: formatNumber(secondNumber),
+    result: result === null ? "" : `= ${result}`
+  };
+
+  Object.entries(parts).forEach(([part, value]) => {
+    const element = boardExercise.querySelector(
+      `[data-expression-part="${part}"]`
+    );
+
+    element.textContent = value;
+    element.hidden = part === "result" && result === null;
+    element.classList.toggle("is-focused", part === focusedPart);
+  });
+}
+
+function setBoardFocus(part = null, showResult = false) {
+  if (!exerciseConfig) {
+    return;
+  }
+
+  renderBoardExpression(
+    {
+      ...exerciseConfig,
+      result: showResult ? exerciseConfig.result : null
+    },
+    part
   );
 }
 
@@ -290,6 +419,8 @@ function clearStudentMotion() {
     "is-walking-backward",
     "is-paused"
   );
+  turnIndicator.hidden = true;
+  stepCounter.hidden = true;
 }
 
 function setStudentFacing(facing) {
@@ -380,38 +511,60 @@ function updateTeacherBubblePosition() {
   });
 }
 
-async function animateStudentArrival() {
+async function animateStudentArrival(generation) {
   movingStudent.classList.add("is-arriving");
   movingStudent.style.opacity = "1";
-  await sleep(750);
+  const completed = await waitForPlayback(750, generation);
   movingStudent.classList.remove("is-arriving");
   updateStudentBubblePosition();
+  return completed;
 }
 
-async function animateStudentTurn(facing) {
+async function animateStudentTurn(facing, generation, config) {
   movingStudent.classList.add("is-turning");
+  turnIndicator.textContent = i18n.t("turn.indicator", {
+    direction: i18n.t(config.turnDirection.i18n)
+  });
+  turnIndicator.hidden = false;
   setStudentFacing(facing);
-  await sleep(760);
+  const completed = await waitForPlayback(1050, generation);
   movingStudent.classList.remove("is-turning");
   updateStudentBubblePosition();
+  return completed;
 }
 
-async function animateStudentStep(nextPosition, isBackward) {
+async function animateStudentStep(
+  nextPosition,
+  isBackward,
+  movementStep,
+  totalSteps,
+  generation
+) {
   movingStudent.classList.add("is-walking");
   movingStudent.classList.toggle("is-walking-backward", isBackward);
+  stepCounter.textContent = i18n.t("walk.counter", {
+    current: movementStep,
+    total: totalSteps
+  });
+  stepCounter.hidden = false;
 
   currentPosition = nextPosition;
   movingStudent.style.left = `${getStudentLeft(currentPosition)}px`;
   window.requestAnimationFrame(updateStudentBubblePosition);
+  playTone({ frequency: 190 + movementStep * 12, duration: 0.07 });
 
-  await sleep(620);
+  const completed = await waitForPlayback(620, generation);
 
   movingStudent.classList.remove(
     "is-walking",
     "is-walking-backward"
   );
 
-  await sleep(90);
+  if (!completed) {
+    return false;
+  }
+
+  return waitForPlayback(90, generation);
 }
 
 function getExerciseConfig() {
@@ -447,9 +600,27 @@ function getExerciseConfig() {
     },
     walkingDirection: {
       i18n:
-        secondNumber >= 0
+        secondNumber > 0
           ? "direction.forward"
-          : "direction.backward"
+          : secondNumber < 0
+            ? "direction.backward"
+            : "direction.still"
+    },
+    movementInstruction: {
+      i18n:
+        secondNumber > 0
+          ? "movement.forward"
+          : secondNumber < 0
+            ? "movement.backward"
+            : "movement.stay"
+    },
+    secondNumberKind: {
+      i18n:
+        secondNumber > 0
+          ? "number.positive"
+          : secondNumber < 0
+            ? "number.negative"
+            : "number.zero"
     },
     numberOfSteps: Math.abs(secondNumber)
   };
@@ -472,6 +643,9 @@ function prepareExercise() {
 }
 
 function updatePlaybackControls() {
+  const exerciseInProgress =
+    currentTimelineStep > 0 &&
+    currentTimelineStep < LAST_TIMELINE_STEP;
   playbackProgress.max = String(LAST_TIMELINE_STEP);
   playbackProgress.value = String(currentTimelineStep);
   playbackCounter.textContent =
@@ -479,13 +653,21 @@ function updatePlaybackControls() {
 
   previousStepButton.disabled = currentTimelineStep === 0;
   nextStepButton.disabled =
-    currentTimelineStep === LAST_TIMELINE_STEP;
+    currentTimelineStep === LAST_TIMELINE_STEP ||
+    isPlaying ||
+    isTransitioning;
   pauseButton.disabled = !isPlaying || isPaused;
-  startButton.disabled = isPlaying;
+  startButton.disabled = isPlaying || isTransitioning || exerciseInProgress;
+  randomButton.disabled = isPlaying || isTransitioning || exerciseInProgress;
+  previousStepButton.disabled =
+    previousStepButton.disabled || isPlaying || isTransitioning;
 
-  firstNumberInput.disabled = isPlaying;
-  operatorInput.disabled = isPlaying;
-  secondNumberInput.disabled = isPlaying;
+  firstNumberInput.disabled =
+    isPlaying || isTransitioning || exerciseInProgress;
+  operatorInput.disabled =
+    isPlaying || isTransitioning || exerciseInProgress;
+  secondNumberInput.disabled =
+    isPlaying || isTransitioning || exerciseInProgress;
 
   playButton.setAttribute("aria-pressed", String(isPlaying && !isPaused));
   pauseButton.setAttribute("aria-pressed", String(isPaused));
@@ -494,6 +676,17 @@ function updatePlaybackControls() {
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
   });
+  document.documentElement.dataset.playbackMode = playbackMode;
+  playButton.textContent = i18n.t(
+    isPaused ? "playback.resume" : "playback.autoStart"
+  );
+  nextStepButton.textContent = i18n.t("playback.continue");
+  completionActions.hidden =
+    currentTimelineStep !== LAST_TIMELINE_STEP;
+  board.classList.toggle(
+    "is-complete",
+    currentTimelineStep === LAST_TIMELINE_STEP
+  );
   movingStudent.classList.toggle("is-paused", isPaused);
 }
 
@@ -535,7 +728,9 @@ function getSpeechReplacements(config) {
     second: formatSpeechNumber(config.secondNumber),
     steps: formatSpeechNumber(config.numberOfSteps),
     position: formatSpeechNumber(config.result),
-    direction: config.walkingDirection
+    direction: config.walkingDirection,
+    numberKind: config.secondNumberKind,
+    movement: config.movementInstruction
   };
 }
 
@@ -553,7 +748,7 @@ async function renderTimelineStep(
     0,
     Math.min(LAST_TIMELINE_STEP, step)
   );
-  boardExercise.textContent = config.exercise;
+  setBoardFocus();
   clearStudentMotion();
   setStudentSpeech(null);
 
@@ -574,8 +769,9 @@ async function renderTimelineStep(
       break;
 
     case 1:
-      setTeacherSpeech("speech.first", {
-        first: speech.first
+      setBoardFocus("first");
+      setTeacherSpeech("speech.exerciseQuestion", {
+        exercise: leftToRightIsolate(config.exercise)
       });
       setMessage("message.exercise", {
         exercise: leftToRightIsolate(config.exercise)
@@ -585,35 +781,38 @@ async function renderTimelineStep(
     case 2:
       placeStudentOnTile(config.firstNumber, "front");
       highlightTile(config.firstNumber);
-      setTeacherSpeech("speech.first", {
-        first: speech.first
-      });
-      setStudentSpeech("student.go", {
+      setTeacherSpeech("speech.position", {
         first: speech.first
       });
       setMessage("message.walkTo", {
         first: speech.first
       });
       if (animate) {
-        await animateStudentArrival();
+        setTeacherSpeech("speech.first", { first: speech.first });
+        const arrived = await animateStudentArrival(generation);
+        if (!arrived) {
+          return false;
+        }
+        setTeacherSpeech("speech.position", { first: speech.first });
       }
       break;
 
     case 3:
       placeStudentOnTile(config.firstNumber, "front");
       highlightTile(config.firstNumber);
-      setTeacherSpeech("speech.turn", {
-        operator: speech.operator,
-        direction: config.turnDirection
+      setBoardFocus("operator");
+      setTeacherSpeech("speech.operatorQuestion", {
+        operator: speech.operator
       });
-      setMessage("message.turn", {
-        direction: config.turnDirection
+      setMessage("message.operatorFocus", {
+        operator: speech.operator
       });
       break;
 
     case 4:
       placeStudentOnTile(config.firstNumber, "front");
       highlightTile(config.firstNumber);
+      setBoardFocus("operator");
       setTeacherSpeech("speech.turn", {
         operator: speech.operator,
         direction: config.turnDirection
@@ -626,29 +825,47 @@ async function renderTimelineStep(
         direction: config.turnDirection
       });
       if (animate) {
-        await animateStudentTurn(config.facing);
+        const turned = await animateStudentTurn(
+          config.facing,
+          generation,
+          config
+        );
+        if (!turned) {
+          return false;
+        }
       } else {
         setStudentFacing(config.facing);
+        turnIndicator.textContent = i18n.t("turn.indicator", {
+          direction: i18n.t(config.turnDirection.i18n)
+        });
+        turnIndicator.hidden = false;
       }
       break;
 
     case 5:
       placeStudentOnTile(config.firstNumber, config.facing);
       highlightTile(config.firstNumber);
-      setTeacherSpeech("speech.walk", {
+      setBoardFocus("second");
+      setTeacherSpeech("speech.secondNumber", {
         second: speech.second,
         steps: speech.steps,
-        direction: config.walkingDirection
+        direction: config.walkingDirection,
+        numberKind: config.secondNumberKind,
+        movement: config.movementInstruction
       });
-      setMessage("message.walk", {
+      setMessage("message.secondNumber", {
+        second: speech.second,
         steps: speech.steps,
-        direction: config.walkingDirection
+        direction: config.walkingDirection,
+        numberKind: config.secondNumberKind,
+        movement: config.movementInstruction
       });
       break;
 
     case 6: {
       placeStudentOnTile(config.firstNumber, config.facing);
       highlightTile(config.firstNumber);
+      setBoardFocus("second");
       setTeacherSpeech("speech.walk", {
         second: speech.second,
         steps: speech.steps,
@@ -691,14 +908,26 @@ async function renderTimelineStep(
 
           await animateStudentStep(
             currentPosition + directionOnLine,
-            config.secondNumber < 0
+            config.secondNumber < 0,
+            movementStep + 1,
+            config.numberOfSteps,
+            generation
           );
+
+          if (generation !== playbackGeneration) {
+            return false;
+          }
 
           highlightTile(currentPosition);
         }
       } else {
         placeStudentOnTile(config.result, config.facing);
         markPath(config.firstNumber, config.result);
+        stepCounter.textContent = i18n.t("walk.counter", {
+          current: config.numberOfSteps,
+          total: config.numberOfSteps
+        });
+        stepCounter.hidden = config.numberOfSteps === 0;
       }
       break;
     }
@@ -710,6 +939,7 @@ async function renderTimelineStep(
       setMessage("message.arrived", {
         position: speech.position
       });
+      setBoardFocus();
       break;
 
     case 8:
@@ -722,8 +952,7 @@ async function renderTimelineStep(
       setMessage("message.arrived", {
         position: speech.position
       });
-      boardExercise.textContent =
-        `${config.exercise} = ${config.result}`;
+      setBoardFocus("result", true);
       break;
 
     case 9:
@@ -735,8 +964,8 @@ async function renderTimelineStep(
       setMessage("message.answer", {
         position: speech.position
       });
-      boardExercise.textContent =
-        `${config.exercise} = ${config.result}`;
+      setBoardFocus("result", true);
+      playTone({ frequency: 660, duration: 0.22, volume: 0.035 });
       break;
 
     default:
@@ -753,6 +982,7 @@ function cancelPlayback() {
   playbackGeneration += 1;
   isPlaying = false;
   isPaused = false;
+  isTransitioning = false;
   updatePlaybackControls();
 }
 
@@ -820,6 +1050,36 @@ async function seekTimeline(step) {
   await renderTimelineStep(step);
 }
 
+async function advanceOneStep() {
+  if (
+    isPlaying ||
+    isTransitioning ||
+    currentTimelineStep >= LAST_TIMELINE_STEP
+  ) {
+    return;
+  }
+
+  if (!exerciseConfig && !prepareExercise()) {
+    return;
+  }
+
+  isTransitioning = true;
+  const generation = ++playbackGeneration;
+  updatePlaybackControls();
+
+  try {
+    await renderTimelineStep(currentTimelineStep + 1, {
+      animate: true,
+      generation
+    });
+  } finally {
+    if (generation === playbackGeneration) {
+      isTransitioning = false;
+      updatePlaybackControls();
+    }
+  }
+}
+
 async function runSimulation() {
   cancelPlayback();
 
@@ -829,7 +1089,10 @@ async function runSimulation() {
 
   await renderTimelineStep(0);
   if (playbackMode === "auto") {
+    playTone({ frequency: 340, duration: 0.09 });
     await playTimeline();
+  } else {
+    await advanceOneStep();
   }
 }
 
@@ -846,6 +1109,42 @@ async function resetSimulator() {
   }
 
   await renderTimelineStep(0);
+}
+
+async function prepareNewExercise({ random = false } = {}) {
+  cancelPlayback();
+
+  if (random) {
+    const generated = createRandomExercise();
+    firstNumberInput.value = generated.firstNumber;
+    operatorInput.value = generated.operator;
+    secondNumberInput.value = generated.secondNumber;
+  } else {
+    firstNumberInput.value = 0;
+    operatorInput.value = "+";
+    secondNumberInput.value = 0;
+  }
+
+  exerciseConfig = null;
+  if (!prepareExercise()) {
+    return;
+  }
+
+  await renderTimelineStep(0);
+}
+
+async function replayExercise() {
+  cancelPlayback();
+  if (!prepareExercise()) {
+    return;
+  }
+
+  await renderTimelineStep(0);
+  if (playbackMode === "auto") {
+    await playTimeline();
+  } else {
+    await advanceOneStep();
+  }
 }
 
 function handleExerciseInput() {
@@ -865,6 +1164,9 @@ operatorInput.addEventListener("change", handleExerciseInput);
 secondNumberInput.addEventListener("input", handleExerciseInput);
 startButton.addEventListener("click", runSimulation);
 resetButton.addEventListener("click", resetSimulator);
+randomButton.addEventListener("click", () => {
+  prepareNewExercise({ random: true });
+});
 playButton.addEventListener("click", playTimeline);
 pauseButton.addEventListener("click", () => {
   if (!isPlaying) {
@@ -878,7 +1180,7 @@ previousStepButton.addEventListener("click", () => {
   seekTimeline(currentTimelineStep - 1);
 });
 nextStepButton.addEventListener("click", () => {
-  seekTimeline(currentTimelineStep + 1);
+  advanceOneStep();
 });
 playbackProgress.addEventListener("input", () => {
   seekTimeline(Number(playbackProgress.value));
@@ -895,6 +1197,21 @@ languageButtons.forEach(button => {
     i18n.setLocale(button.dataset.locale);
   });
 });
+
+soundToggleButton.addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  updateSoundControl();
+  if (soundEnabled) {
+    playTone({ frequency: 520, duration: 0.12 });
+  }
+});
+newExerciseButton.addEventListener("click", () => {
+  prepareNewExercise();
+});
+completionRandomButton.addEventListener("click", () => {
+  prepareNewExercise({ random: true });
+});
+replayButton.addEventListener("click", replayExercise);
 
 numberLineArea.addEventListener("scroll", updateStudentBubblePosition);
 window.addEventListener("resize", updateStudentBubblePosition);

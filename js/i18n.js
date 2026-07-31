@@ -85,14 +85,20 @@ const messages = {
     "controls.secondNumber": "הכניסו את המספר השני",
     "controls.start": "הפעלת התרגיל",
     "controls.reset": "איפוס",
+    "controls.random": "תרגיל אקראי",
+    "sound.off": "🔇 קול כבוי",
+    "sound.on": "🔊 קול פעיל",
     "playback.aria": "בקרת הפעלה",
     "playback.mode.label": "אופן ההתקדמות בתרגיל",
-    "playback.mode.auto": "ניגון רציף",
-    "playback.mode.manual": "צעד־אחר־צעד",
+    "playback.mode.auto": "הפעלה אוטומטית",
+    "playback.mode.manual": "מצב מודרך",
     "playback.previous": "חזרה לשלב הקודם",
     "playback.play": "הפעלה",
     "playback.pause": "השהיה",
     "playback.next": "מעבר לשלב הבא",
+    "playback.continue": "המשך",
+    "playback.autoStart": "הפעל",
+    "playback.resume": "המשך",
     "playback.progress": "התקדמות בתרגיל",
     "classroom.aria": "הדמיית כיתה אינטראקטיבית",
     "classroom.clock": "שעון קיר",
@@ -108,12 +114,17 @@ const messages = {
     "error.integer": "יש להזין מספרים שלמים בין מינוס 30 ל־30.",
     "error.range": "התוצאה רחוקה מדי עבור רצפת הכיתה.",
     "message.exercise": "התרגיל על הלוח הוא {exercise}.",
+    "speech.exerciseQuestion":
+      "התרגיל שלנו הוא {exercise}. מהו המספר הראשון?",
     "speech.first":
       "המספר הראשון הוא {first}. לך לעמוד על האריח שמסומן {first}.",
     "student.go":
       "אוקיי, אני הולך לאריח שמסומן {first}.",
     "message.walkTo": "התלמיד הולך אל האריח {first}.",
     "speech.position": "עכשיו אתה עומד על {first}.",
+    "speech.operatorQuestion":
+      "עכשיו הסתכל על סימן הפעולה {operator}. מה הוא אומר לך לעשות?",
+    "message.operatorFocus": "סימן הפעולה הוא {operator}.",
     "speech.turn":
       "הסימן {operator} אומר להסתובב 90 מעלות כך שהפנים פונות {direction}.",
     "student.turn":
@@ -129,13 +140,28 @@ const messages = {
     "message.walk": "התלמיד הולך {steps} צעדים {direction}.",
     "direction.forward": "קדימה",
     "direction.backward": "אחורה",
+    "direction.still": "ונשאר במקום",
+    "movement.forward": "הולכים קדימה",
+    "movement.backward": "הולכים אחורה",
+    "movement.stay": "נשארים במקום",
+    "number.positive": "חיובי",
+    "number.negative": "שלילי",
+    "number.zero": "אפס",
+    "speech.secondNumber":
+      "עכשיו הסתכל על המספר השני: {second}. הוא {numberKind}, לכן {movement}. כמה צעדים? {steps}.",
+    "message.secondNumber":
+      "המספר השני {second} הוא {numberKind}: {movement}, {steps} צעדים.",
+    "turn.indicator": "90° {direction}",
+    "walk.counter": "צעד {current} מתוך {total}",
     "speech.question": "על איזה אריח אתה עומד עכשיו?",
     "student.answer": "אני עומד על האריח {position}.",
     "message.arrived": "התלמיד הגיע לאריח {position}.",
     "speech.answer":
       "נכון, ולכן תוצאת התרגיל היא {position}.",
     "message.answer":
-      "המורה מסכם: תוצאת התרגיל היא {position}."
+      "המורה מסכם: תוצאת התרגיל היא {position}.",
+    "completion.new": "תרגיל חדש",
+    "completion.replay": "הפעל שוב"
   },
   en: {
     "document.title":
@@ -155,14 +181,20 @@ const messages = {
     "controls.secondNumber": "Enter the second number",
     "controls.start": "Run exercise",
     "controls.reset": "Reset",
+    "controls.random": "Random exercise",
+    "sound.off": "🔇 Sound off",
+    "sound.on": "🔊 Sound on",
     "playback.aria": "Playback controls",
     "playback.mode.label": "Choose how to move through the exercise",
-    "playback.mode.auto": "Play continuously",
-    "playback.mode.manual": "Step by step",
+    "playback.mode.auto": "Auto play",
+    "playback.mode.manual": "Guided mode",
     "playback.previous": "Previous step",
     "playback.play": "Play",
     "playback.pause": "Pause",
     "playback.next": "Next step",
+    "playback.continue": "Continue",
+    "playback.autoStart": "Play",
+    "playback.resume": "Resume",
     "playback.progress": "Exercise progress",
     "classroom.aria": "Interactive classroom simulation",
     "classroom.clock": "Wall clock",
@@ -178,11 +210,16 @@ const messages = {
     "error.integer": "Enter whole numbers from −30 to 30.",
     "error.range": "The result is too far away for the classroom floor.",
     "message.exercise": "The exercise on the board is {exercise}.",
+    "speech.exerciseQuestion":
+      "Our exercise is {exercise}. What is the first number?",
     "speech.first":
       "The first number is {first}. Go and stand on tile {first}.",
     "student.go": "Okay, I’m going to tile {first}.",
     "message.walkTo": "The student walks to tile {first}.",
     "speech.position": "You are now standing on {first}.",
+    "speech.operatorQuestion":
+      "Now look at the operation sign {operator}. What does it tell you to do?",
+    "message.operatorFocus": "The operation sign is {operator}.",
     "speech.turn":
       "The {operator} sign means turn 90 degrees so your face points {direction}.",
     "student.turn":
@@ -197,13 +234,28 @@ const messages = {
     "message.walk": "The student takes {steps} steps {direction}.",
     "direction.forward": "forward",
     "direction.backward": "backward",
+    "direction.still": "and stay in place",
+    "movement.forward": "move forward",
+    "movement.backward": "move backward",
+    "movement.stay": "stay in place",
+    "number.positive": "positive",
+    "number.negative": "negative",
+    "number.zero": "zero",
+    "speech.secondNumber":
+      "Now look at the second number: {second}. It is {numberKind}, so {movement}. How many steps? {steps}.",
+    "message.secondNumber":
+      "The second number {second} is {numberKind}: {movement}, {steps} steps.",
+    "turn.indicator": "90° {direction}",
+    "walk.counter": "Step {current} of {total}",
     "speech.question": "Which tile are you standing on now?",
     "student.answer": "I am standing on tile {position}.",
     "message.arrived": "The student arrived at tile {position}.",
     "speech.answer":
       "Correct, so the result of the exercise is {position}.",
     "message.answer":
-      "The teacher concludes: the result of the exercise is {position}."
+      "The teacher concludes: the result of the exercise is {position}.",
+    "completion.new": "New exercise",
+    "completion.replay": "Play again"
   }
 };
 

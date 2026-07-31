@@ -159,6 +159,23 @@ button,
   gap: 12px;
 }
 
+.sound-toggle {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.sound-toggle:hover:not(:disabled) {
+  background: var(--surface-soft);
+  color: var(--primary);
+  transform: none;
+}
+
 .language-switcher {
   display: inline-flex;
   align-items: center;
@@ -232,8 +249,9 @@ main {
     minmax(70px, 0.55fr)
     minmax(96px, 1fr)
     minmax(118px, auto)
-    minmax(76px, auto);
-  grid-template-areas: "first operator second start reset";
+    minmax(76px, auto)
+    minmax(100px, auto);
+  grid-template-areas: "first operator second start reset random";
   align-items: end;
   gap: 8px;
   padding: 0;
@@ -331,6 +349,11 @@ button:disabled {
   grid-area: reset;
 }
 
+#randomButton {
+  grid-area: random;
+  background: #0b7285;
+}
+
 .message {
   text-align: center;
 }
@@ -388,6 +411,12 @@ button:disabled {
   direction: ltr;
 }
 
+html[data-playback-mode="manual"] #playButton,
+html[data-playback-mode="manual"] #pauseButton,
+html[data-playback-mode="auto"] #nextStepButton {
+  display: none;
+}
+
 .playback-mode-switch {
   display: inline-flex;
   align-items: center;
@@ -433,6 +462,13 @@ button:disabled {
   line-height: 1;
 }
 
+.playback-text-button {
+  width: auto;
+  min-width: 70px;
+  padding-inline: 10px;
+  font-size: 0.72rem;
+}
+
 .playback-button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.27);
 }
@@ -458,6 +494,32 @@ button:disabled {
   font-family: "Manrope", Arial, sans-serif;
   font-size: 0.72rem;
   direction: ltr;
+}
+
+.completion-actions {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+}
+
+.completion-actions:not([hidden]) {
+  display: flex;
+}
+
+.board.is-complete .playback-controls {
+  display: none;
+}
+
+.completion-actions button {
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+}
+
+.completion-actions #completionRandomButton {
+  background: #0b7285;
 }
 
 .classroom {
@@ -527,6 +589,29 @@ button:disabled {
   font-weight: 700;
   line-height: 1;
   direction: ltr;
+}
+
+.board-exercise [data-expression-part] {
+  display: inline-block;
+  min-width: 0.7em;
+  padding: 3px 6px;
+  border-radius: 8px;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.board-exercise [data-expression-part].is-focused {
+  background: rgba(255, 232, 154, 0.22);
+  color: #ffe89a;
+  box-shadow: 0 0 0 2px rgba(255, 232, 154, 0.72);
+  transform: translateY(-2px) scale(1.06);
+}
+
+.board-exercise [data-expression-part="result"] {
+  color: #ffe89a;
 }
 
 .board-result {
@@ -1018,6 +1103,32 @@ button:disabled {
   z-index: 20;
 }
 
+.turn-indicator,
+.step-counter {
+  position: absolute;
+  top: -31px;
+  left: 50%;
+  z-index: 30;
+  width: max-content;
+  max-width: 150px;
+  padding: 3px 8px;
+  border: 2px solid rgba(23, 76, 58, 0.75);
+  border-radius: 999px;
+  background: #fffde1;
+  color: #17313e;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 10px rgba(38, 56, 66, 0.2);
+}
+
+.step-counter {
+  top: -29px;
+  border-color: rgba(11, 58, 138, 0.7);
+  background: #f1f5fb;
+}
+
 .student-pose {
   position: relative;
   width: 50px;
@@ -1505,9 +1616,10 @@ button:disabled {
       minmax(70px, 0.55fr)
       minmax(96px, 1fr)
       minmax(118px, auto)
-      minmax(76px, auto);
+      minmax(76px, auto)
+      minmax(100px, auto);
     grid-template-rows: auto;
-    grid-template-areas: "first operator second start reset";
+    grid-template-areas: "first operator second start reset random";
     gap: 8px;
     margin: 0;
     padding: 0;
@@ -1704,7 +1816,7 @@ button:disabled {
     grid-template-rows: auto auto;
     grid-template-areas:
       "first operator second"
-      "start start reset";
+      "start reset random";
     gap: 6px;
   }
 
@@ -1732,6 +1844,10 @@ button:disabled {
 
   .playback-button {
     width: 100%;
+  }
+
+  .playback-text-button {
+    min-width: 0;
   }
 
   .playback-progress {

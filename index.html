@@ -54,6 +54,15 @@
       </div>
 
       <div class="header-actions">
+        <button
+          id="soundToggleButton"
+          class="sound-toggle"
+          type="button"
+          aria-pressed="false"
+          data-i18n="sound.off"
+        >
+          🔇 קול כבוי
+        </button>
         <div
           class="language-switcher"
           role="group"
@@ -168,6 +177,14 @@
               >
                 איפוס
               </button>
+              <button
+                id="randomButton"
+                class="random-button"
+                type="button"
+                data-i18n="controls.random"
+              >
+                תרגיל אקראי
+              </button>
             </section>
 
             <div class="board-display">
@@ -176,7 +193,10 @@
                 class="board-exercise"
                 aria-live="polite"
               >
-                0 + 0
+                <span data-expression-part="first">0</span>
+                <span data-expression-part="operator">+</span>
+                <span data-expression-part="second">0</span>
+                <span data-expression-part="result" hidden></span>
               </div>
             </div>
 
@@ -198,15 +218,15 @@
                 data-i18n-aria-label="playback.mode.label"
               >
                 <button
-                  class="playback-mode-option is-active"
+                  class="playback-mode-option"
                   type="button"
                   data-playback-mode="auto"
                   data-i18n="playback.mode.auto"
                 >
-                  ניגון רציף
+                  הפעלה אוטומטית
                 </button>
                 <button
-                  class="playback-mode-option"
+                  class="playback-mode-option is-active"
                   type="button"
                   data-playback-mode="manual"
                   data-i18n="playback.mode.manual"
@@ -224,11 +244,12 @@
               </button>
               <button
                 id="playButton"
-                class="playback-button playback-primary"
+                class="playback-button playback-primary playback-text-button"
                 type="button"
                 data-i18n-aria-label="playback.play"
+                data-i18n="playback.continue"
               >
-                ▶
+                המשך
               </button>
               <button
                 id="pauseButton"
@@ -240,11 +261,12 @@
               </button>
               <button
                 id="nextStepButton"
-                class="playback-button"
+                class="playback-button playback-text-button"
                 type="button"
                 data-i18n-aria-label="playback.next"
+                data-i18n="playback.continue"
               >
-                ⏭
+                המשך
               </button>
               <input
                 id="playbackProgress"
@@ -259,6 +281,18 @@
               <output id="playbackCounter" class="playback-counter">
                 0 / 9
               </output>
+            </div>
+
+            <div id="completionActions" class="completion-actions" hidden>
+              <button id="newExerciseButton" type="button" data-i18n="completion.new">
+                תרגיל חדש
+              </button>
+              <button id="completionRandomButton" type="button" data-i18n="controls.random">
+                תרגיל אקראי
+              </button>
+              <button id="replayButton" type="button" data-i18n="completion.replay">
+                הפעל שוב
+              </button>
             </div>
           </div>
 
@@ -317,6 +351,8 @@
               class="moving-student"
               data-facing="front"
             >
+              <div id="turnIndicator" class="turn-indicator" hidden></div>
+              <div id="stepCounter" class="step-counter" hidden></div>
               <div class="student-pose">
                 <div class="head">
                   <div class="hair"></div>
@@ -348,7 +384,7 @@
     </main>
   </div>
 
-  <script src="js/i18n.js?v=app-title-1"></script>
-  <script src="js/app.js?v=single-screen-1"></script>
+  <script src="js/i18n.js?v=guided-dialogue-1"></script>
+  <script src="js/app.js?v=guided-dialogue-1"></script>
 </body>
 </html>
