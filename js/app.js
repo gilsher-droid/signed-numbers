@@ -55,7 +55,7 @@ let playbackGeneration = 0;
 let isPlaying = false;
 let isPaused = false;
 let isTransitioning = false;
-let playbackMode = "manual";
+let playbackMode = "auto";
 let soundEnabled = false;
 let audioContext = null;
 let randomPatternIndex = 0;
@@ -467,6 +467,9 @@ function positionDockedBubble(bubble) {
     16;
 
   bubble.dataset.side = "docked";
+  if (bubble === studentSpeechBubble) {
+    movingStudent.dataset.bubbleSide = "docked";
+  }
   bubble.style.left = `${left}px`;
   bubble.style.top = `${top}px`;
 }
@@ -486,8 +489,12 @@ function updateStudentBubblePosition() {
 
   const classroomRect = classroom.getBoundingClientRect();
   const studentRect = movingStudent.getBoundingClientRect();
-  const bubbleWidth = studentSpeechBubble.offsetWidth;
-  const bubbleHeight = studentSpeechBubble.offsetHeight;
+  const occupiedRect = combineRects(
+    studentRect,
+    getVisibleRect(turnIndicator),
+    getVisibleRect(stepCounter)
+  );
+  studentSpeechBubble.style.width = "";
 
   if (isCompactClassroom()) {
     positionDockedBubble(studentSpeechBubble);
@@ -497,31 +504,86 @@ function updateStudentBubblePosition() {
 
   const horizontalGap = 18;
   const padding = 10;
-  const centerX =
-    studentRect.left - classroomRect.left + studentRect.width / 2;
-  const leftCandidate = centerX - horizontalGap - bubbleWidth;
-  const rightCandidate = centerX + horizontalGap;
+  const naturalWidth = studentSpeechBubble.offsetWidth;
+  const naturalHeight = studentSpeechBubble.offsetHeight;
+  const leftSpace =
+    occupiedRect.left - classroomRect.left - horizontalGap - padding;
+  const rightStart =
+    occupiedRect.right - classroomRect.left + horizontalGap;
+  const rightSpace = classroomRect.width - padding - rightStart;
+  const naturalLeft = leftSpace - naturalWidth + padding;
   const teacherRect = teacher.getBoundingClientRect();
+  const naturalTop =
+    studentRect.top - classroomRect.top - naturalHeight + 8;
   const leftViewportRect = {
-    left: classroomRect.left + leftCandidate,
-    right: classroomRect.left + leftCandidate + bubbleWidth,
-    top: studentRect.top - bubbleHeight + 8,
-    bottom: studentRect.top + 8
+    left: classroomRect.left + naturalLeft,
+    right: classroomRect.left + naturalLeft + naturalWidth,
+    top: classroomRect.top + naturalTop,
+    bottom: classroomRect.top + naturalTop + naturalHeight
   };
+  const rightViewportRect = {
+    left: classroomRect.left + rightStart,
+    right: classroomRect.left + rightStart + naturalWidth,
+    top: classroomRect.top + naturalTop,
+    bottom: classroomRect.top + naturalTop + naturalHeight
+  };
+  const leftBlocked = rectanglesOverlap(
+    leftViewportRect,
+    teacherRect,
+    10
+  );
+  const rightBlocked = rectanglesOverlap(
+    rightViewportRect,
+    teacherRect,
+    10
+  );
   const canUseLeft =
-    leftCandidate >= padding &&
-    !rectanglesOverlap(leftViewportRect, teacherRect, 10);
-  const maximumLeft = classroomRect.width - bubbleWidth - padding;
-  const chosenLeft = canUseLeft ? leftCandidate : rightCandidate;
+    leftSpace >= naturalWidth && !leftBlocked;
+  const canUseRight =
+    rightSpace >= naturalWidth && !rightBlocked;
+  const bubbleSide = canUseLeft
+    ? "left"
+    : canUseRight || (leftBlocked && !rightBlocked)
+      ? "right"
+      : rightBlocked && !leftBlocked
+        ? "left"
+        : leftSpace >= rightSpace
+          ? "left"
+          : "right";
+  const availableWidth = bubbleSide === "left" ? leftSpace : rightSpace;
+  studentSpeechBubble.style.width = `${Math.min(
+    naturalWidth,
+    Math.max(180, availableWidth)
+  )}px`;
 
-  studentSpeechBubble.dataset.side = canUseLeft ? "left" : "right";
+  const bubbleWidth = studentSpeechBubble.offsetWidth;
+  const bubbleHeight = studentSpeechBubble.offsetHeight;
+  const leftCandidate =
+    occupiedRect.left - classroomRect.left - horizontalGap - bubbleWidth;
+  const rightCandidate = rightStart;
+  const maximumLeft = classroomRect.width - bubbleWidth - padding;
+  const chosenLeft = bubbleSide === "left"
+    ? leftCandidate
+    : rightCandidate;
+  const boardRect = board.getBoundingClientRect();
+  const minimumTop = Math.max(
+    padding,
+    boardRect.bottom - classroomRect.top + 8
+  );
+  const topCandidate = Math.max(
+    studentRect.top - classroomRect.top - bubbleHeight + 8,
+    minimumTop
+  );
+
+  studentSpeechBubble.dataset.side = bubbleSide;
+  movingStudent.dataset.bubbleSide = bubbleSide;
   studentSpeechBubble.style.left = `${clamp(
     chosenLeft,
     padding,
     maximumLeft
   )}px`;
   studentSpeechBubble.style.top = `${clamp(
-    studentRect.top - classroomRect.top - bubbleHeight + 8,
+    topCandidate,
     padding,
     classroomRect.height - bubbleHeight - padding
   )}px`;
@@ -534,6 +596,38 @@ function rectanglesOverlap(firstRect, secondRect, padding = 0) {
     firstRect.left >= secondRect.right + padding ||
     firstRect.bottom + padding <= secondRect.top ||
     firstRect.top >= secondRect.bottom + padding
+  );
+}
+
+function combineRects(...rects) {
+  const visibleRects = rects.filter(Boolean);
+
+  if (!visibleRects.length) {
+    return null;
+  }
+
+  return {
+    left: Math.min(...visibleRects.map(rect => rect.left)),
+    right: Math.max(...visibleRects.map(rect => rect.right)),
+    top: Math.min(...visibleRects.map(rect => rect.top)),
+    bottom: Math.max(...visibleRects.map(rect => rect.bottom))
+  };
+}
+
+function getVisibleRect(element) {
+  if (!element || element.hidden) {
+    return null;
+  }
+
+  const rect = element.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0 ? rect : null;
+}
+
+function getStudentOccupiedRect() {
+  return combineRects(
+    getVisibleStudentRect(),
+    getVisibleRect(turnIndicator),
+    getVisibleRect(stepCounter)
   );
 }
 
@@ -570,7 +664,7 @@ function updateTeacherBubblePosition() {
   const classroomRect = classroom.getBoundingClientRect();
   const teacherRect = teacher.getBoundingClientRect();
   const boardRect = board.getBoundingClientRect();
-  const studentRect = getVisibleStudentRect();
+  const studentRect = getStudentOccupiedRect();
   const bubbleWidth = speechBubble.offsetWidth;
   const bubbleHeight = speechBubble.offsetHeight;
   const horizontalGap = 15;
@@ -624,6 +718,10 @@ async function animateStudentTurn(facing, generation, config) {
     direction: i18n.t(config.turnDirection.i18n)
   });
   turnIndicator.hidden = false;
+  window.requestAnimationFrame(() => {
+    updateStudentBubblePosition();
+    updateTeacherBubblePosition();
+  });
   setStudentFacing(facing);
   const completed = await waitForPlayback(1050, generation);
   movingStudent.classList.remove("is-turning");
@@ -937,6 +1035,10 @@ async function renderTimelineStep(
           direction: i18n.t(config.turnDirection.i18n)
         });
         turnIndicator.hidden = false;
+        window.requestAnimationFrame(() => {
+          updateStudentBubblePosition();
+          updateTeacherBubblePosition();
+        });
       }
       break;
 
