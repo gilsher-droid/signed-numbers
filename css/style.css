@@ -923,6 +923,7 @@ html[data-playback-mode="auto"] #nextStepButton {
 }
 
 .speech-bubble.is-positioning {
+  visibility: hidden;
   transition: none;
 }
 
@@ -1161,6 +1162,20 @@ html[data-playback-mode="auto"] #nextStepButton {
   top: -29px;
   border-color: rgba(11, 58, 138, 0.7);
   background: #f1f5fb;
+}
+
+.moving-student[data-bubble-side="right"] .turn-indicator,
+.moving-student[data-bubble-side="right"] .step-counter {
+  right: calc(100% + 8px);
+  left: auto;
+  transform: none;
+}
+
+.moving-student[data-bubble-side="left"] .turn-indicator,
+.moving-student[data-bubble-side="left"] .step-counter {
+  right: auto;
+  left: calc(100% + 8px);
+  transform: none;
 }
 
 .student-pose {
