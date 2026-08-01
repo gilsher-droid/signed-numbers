@@ -123,10 +123,10 @@ const messages = {
     "message.walkTo": "התלמיד הולך אל האריח {first}.",
     "speech.position": "עכשיו אתה עומד על {first}.",
     "speech.operatorQuestion":
-      "עכשיו הסתכל על סימן הפעולה {operator}. מה הוא אומר לך לעשות?",
-    "message.operatorFocus": "סימן הפעולה הוא {operator}.",
+      "עכשיו הסתכל על הפעולה {operator}. מה היא אומרת לך לעשות?",
+    "message.operatorFocus": "הפעולה היא {operator}.",
     "speech.turn":
-      "הסימן {operator} אומר להסתובב 90 מעלות כך שהפנים פונות {direction}.",
+      "הפעולה {operator} אומרת להסתובב 90 מעלות כך שהפנים פונות {direction}.",
     "student.turn":
       "אני מסתובב 90 מעלות עם הפנים {direction}, כי אמרת {operator}.",
     "message.turn":
@@ -147,6 +147,9 @@ const messages = {
     "number.positive": "חיובי",
     "number.negative": "שלילי",
     "number.zero": "אפס",
+    "number.minus": "מינוס",
+    "operation.add": "ועוד",
+    "operation.subtract": "פחות",
     "speech.secondNumber":
       "עכשיו הסתכל על המספר השני: {second}. הוא {numberKind}, לכן {movement}. כמה צעדים? {steps}.",
     "message.secondNumber":
@@ -218,10 +221,10 @@ const messages = {
     "message.walkTo": "The student walks to tile {first}.",
     "speech.position": "You are now standing on {first}.",
     "speech.operatorQuestion":
-      "Now look at the operation sign {operator}. What does it tell you to do?",
-    "message.operatorFocus": "The operation sign is {operator}.",
+      "Now look at the {operator} operation. What does it tell you to do?",
+    "message.operatorFocus": "The operation is {operator}.",
     "speech.turn":
-      "The {operator} sign means turn 90 degrees so your face points {direction}.",
+      "The {operator} operation means turn 90 degrees so your face points {direction}.",
     "student.turn":
       "I turn 90 degrees with my face pointing {direction}, because you said {operator}.",
     "message.turn":
@@ -241,6 +244,9 @@ const messages = {
     "number.positive": "positive",
     "number.negative": "negative",
     "number.zero": "zero",
+    "number.minus": "negative",
+    "operation.add": "add",
+    "operation.subtract": "subtract",
     "speech.secondNumber":
       "Now look at the second number: {second}. It is {numberKind}, so {movement}. How many steps? {steps}.",
     "message.secondNumber":

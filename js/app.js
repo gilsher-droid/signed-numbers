@@ -86,6 +86,22 @@ function formatExercise(firstNumber, operator, secondNumber) {
   return `${firstNumber} ${operator} ${formatNumber(secondNumber)}`;
 }
 
+function formatSpokenNumber(number) {
+  if (number < 0) {
+    return `${i18n.t("number.minus")} ${formatSpeechNumber(
+      Math.abs(number)
+    )}`;
+  }
+
+  return formatSpeechNumber(number);
+}
+
+function formatSpokenExercise(config) {
+  return `${formatSpokenNumber(config.firstNumber)} ${i18n.t(
+    config.operationName.i18n
+  )} ${formatSpokenNumber(config.secondNumber)}`;
+}
+
 function calculateResult(firstNumber, operator, secondNumber) {
   return operator === "+"
     ? firstNumber + secondNumber
@@ -175,6 +191,10 @@ function updateSoundControl() {
 function resolveReplacements(replacements = {}) {
   return Object.fromEntries(
     Object.entries(replacements).map(([key, value]) => {
+      if (value && typeof value === "object" && value.spokenExercise) {
+        return [key, formatSpokenExercise(value.spokenExercise)];
+      }
+
       if (value && typeof value === "object" && value.i18n) {
         return [key, i18n.t(value.i18n)];
       }
@@ -591,6 +611,10 @@ function updateStudentBubblePosition() {
 }
 
 function rectanglesOverlap(firstRect, secondRect, padding = 0) {
+  if (!firstRect || !secondRect) {
+    return false;
+  }
+
   return !(
     firstRect.right + padding <= secondRect.left ||
     firstRect.left >= secondRect.right + padding ||
@@ -790,6 +814,9 @@ function getExerciseConfig() {
     secondNumber,
     result,
     exercise: formatExercise(firstNumber, operator, secondNumber),
+    operationName: {
+      i18n: operator === "+" ? "operation.add" : "operation.subtract"
+    },
     facing: operator === "+" ? "right" : "left",
     turnDirection: {
       i18n: operator === "+" ? "direction.right" : "direction.left"
@@ -920,7 +947,7 @@ async function waitForPlayback(milliseconds, generation) {
 function getSpeechReplacements(config) {
   return {
     first: formatSpeechNumber(config.firstNumber),
-    operator: leftToRightIsolate(config.operator),
+    operator: config.operationName,
     second: formatSpeechNumber(config.secondNumber),
     steps: formatSpeechNumber(config.numberOfSteps),
     position: formatSpeechNumber(config.result),
@@ -967,10 +994,10 @@ async function renderTimelineStep(
     case 1:
       setBoardFocus("first");
       setTeacherSpeech("speech.exerciseQuestion", {
-        exercise: leftToRightIsolate(config.exercise)
+        exercise: { spokenExercise: config }
       });
       setMessage("message.exercise", {
-        exercise: leftToRightIsolate(config.exercise)
+        exercise: { spokenExercise: config }
       });
       break;
 
