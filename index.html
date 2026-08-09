@@ -21,7 +21,7 @@
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&amp;family=Montserrat:wght@600;700;800&amp;family=Noto+Sans+Hebrew:wght@400;600;700;800&amp;display=swap"
   />
-  <link rel="stylesheet" href="css/style.css?v=english-header-fit-1" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-number-steppers-1" />
 </head>
 
 <body>
@@ -123,18 +123,48 @@
               data-i18n-aria-label="controls.aria"
             >
               <div class="field field-first">
-                <label for="firstNumber" data-i18n="controls.firstNumber">
+                <label
+                  id="firstNumberLabel"
+                  for="firstNumber"
+                  data-i18n="controls.firstNumber"
+                >
                   הכניסו את המספר הראשון
                 </label>
-                <input
-                  id="firstNumber"
-                  type="number"
-                  value="0"
-                  min="-30"
-                  max="30"
-                  step="1"
-                  inputmode="numeric"
-                />
+                <div
+                  class="number-stepper"
+                  role="group"
+                  aria-labelledby="firstNumberLabel"
+                >
+                  <button
+                    class="number-stepper-button"
+                    type="button"
+                    data-step-input="firstNumber"
+                    data-step-direction="decrement"
+                    data-i18n-aria-label="controls.decrementFirst"
+                    aria-controls="firstNumber"
+                  >
+                    −
+                  </button>
+                  <input
+                    id="firstNumber"
+                    type="number"
+                    value="0"
+                    min="-30"
+                    max="30"
+                    step="1"
+                    inputmode="numeric"
+                  />
+                  <button
+                    class="number-stepper-button"
+                    type="button"
+                    data-step-input="firstNumber"
+                    data-step-direction="increment"
+                    data-i18n-aria-label="controls.incrementFirst"
+                    aria-controls="firstNumber"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
               <div class="field field-operator">
@@ -148,18 +178,48 @@
               </div>
 
               <div class="field field-second">
-                <label for="secondNumber" data-i18n="controls.secondNumber">
+                <label
+                  id="secondNumberLabel"
+                  for="secondNumber"
+                  data-i18n="controls.secondNumber"
+                >
                   הכניסו את המספר השני
                 </label>
-                <input
-                  id="secondNumber"
-                  type="number"
-                  value="0"
-                  min="-30"
-                  max="30"
-                  step="1"
-                  inputmode="numeric"
-                />
+                <div
+                  class="number-stepper"
+                  role="group"
+                  aria-labelledby="secondNumberLabel"
+                >
+                  <button
+                    class="number-stepper-button"
+                    type="button"
+                    data-step-input="secondNumber"
+                    data-step-direction="decrement"
+                    data-i18n-aria-label="controls.decrementSecond"
+                    aria-controls="secondNumber"
+                  >
+                    −
+                  </button>
+                  <input
+                    id="secondNumber"
+                    type="number"
+                    value="0"
+                    min="-30"
+                    max="30"
+                    step="1"
+                    inputmode="numeric"
+                  />
+                  <button
+                    class="number-stepper-button"
+                    type="button"
+                    data-step-input="secondNumber"
+                    data-step-direction="increment"
+                    data-i18n-aria-label="controls.incrementSecond"
+                    aria-controls="secondNumber"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
               <button
@@ -384,7 +444,7 @@
     </main>
   </div>
 
-  <script src="js/i18n.js?v=spoken-operations-3"></script>
-  <script src="js/app.js?v=spoken-operations-3"></script>
+  <script src="js/i18n.js?v=mobile-number-steppers-1"></script>
+  <script src="js/app.js?v=mobile-number-steppers-1"></script>
 </body>
 </html>

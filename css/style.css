@@ -380,6 +380,45 @@ button:disabled {
   font-size: 1rem;
 }
 
+.number-stepper {
+  display: grid;
+  grid-template-columns: minmax(34px, auto) minmax(34px, 1fr) minmax(34px, auto);
+  align-items: stretch;
+  direction: ltr;
+}
+
+.board-controls .number-stepper input {
+  min-width: 0;
+  border-radius: 0;
+  border-inline-width: 0;
+  appearance: textfield;
+}
+
+.board-controls .number-stepper input::-webkit-inner-spin-button,
+.board-controls .number-stepper input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.board-controls .number-stepper-button {
+  min-width: 34px;
+  min-height: 38px;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 8px 0 0 8px;
+  background: var(--brand-purple);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.board-controls .number-stepper-button:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.board-controls .number-stepper-button:hover:not(:disabled) {
+  transform: none;
+}
+
 .board-controls button {
   min-height: 38px;
   padding: 5px 12px;
@@ -1934,6 +1973,20 @@ html[data-playback-mode="auto"] #nextStepButton {
 }
 
 @media (max-width: 390px) {
+  .board {
+    width: calc(100% - 12px);
+    padding-inline: 6px;
+  }
+
+  .board-controls {
+    grid-template-columns: minmax(104px, 1fr) 40px minmax(104px, 1fr);
+    gap: 4px;
+  }
+
+  .number-stepper {
+    grid-template-columns: 34px minmax(34px, 1fr) 34px;
+  }
+
   .header-actions {
     align-items: stretch;
   }
