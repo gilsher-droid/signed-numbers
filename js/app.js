@@ -43,6 +43,9 @@ const playbackModeButtons = Array.from(
 const languageButtons = Array.from(
   document.querySelectorAll(".language-option")
 );
+const numberStepperButtons = Array.from(
+  document.querySelectorAll(".number-stepper-button")
+);
 
 const LAST_TIMELINE_STEP = 9;
 const leftToRightIsolate = value => `\u2066${value}\u2069`;
@@ -286,6 +289,38 @@ function updateBoardExercise() {
   const secondNumber = Number(secondNumberInput.value);
 
   renderBoardExpression({ firstNumber, operator, secondNumber });
+}
+
+function updateNumberStepperButtons() {
+  numberStepperButtons.forEach(button => {
+    const input = document.getElementById(button.dataset.stepInput);
+    const value = input.valueAsNumber;
+    const minimum = Number(input.min);
+    const maximum = Number(input.max);
+    const isDecrement = button.dataset.stepDirection === "decrement";
+    const isAtLimit = Number.isFinite(value) && (
+      isDecrement ? value <= minimum : value >= maximum
+    );
+
+    button.disabled = input.disabled || isAtLimit;
+  });
+}
+
+function stepNumberInput(button) {
+  const input = document.getElementById(button.dataset.stepInput);
+
+  if (!input || input.disabled) {
+    return;
+  }
+
+  const direction = button.dataset.stepDirection === "decrement" ? -1 : 1;
+  const minimum = Number(input.min);
+  const maximum = Number(input.max);
+  const currentValue = Number.isFinite(input.valueAsNumber)
+    ? input.valueAsNumber
+    : 0;
+  input.value = clamp(currentValue + direction, minimum, maximum);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function renderBoardExpression(
@@ -891,6 +926,7 @@ function updatePlaybackControls() {
     isPlaying || isTransitioning || exerciseInProgress;
   secondNumberInput.disabled =
     isPlaying || isTransitioning || exerciseInProgress;
+  updateNumberStepperButtons();
 
   playButton.setAttribute("aria-pressed", String(isPlaying && !isPaused));
   pauseButton.setAttribute("aria-pressed", String(isPaused));
@@ -1389,6 +1425,9 @@ function handleExerciseInput() {
 firstNumberInput.addEventListener("input", handleExerciseInput);
 operatorInput.addEventListener("change", handleExerciseInput);
 secondNumberInput.addEventListener("input", handleExerciseInput);
+numberStepperButtons.forEach(button => {
+  button.addEventListener("click", () => stepNumberInput(button));
+});
 startButton.addEventListener("click", runSimulation);
 resetButton.addEventListener("click", resetSimulator);
 randomButton.addEventListener("click", () => {
