@@ -12,6 +12,12 @@
   const simulatorId = simulatorByHost[window.location.hostname];
   if (!simulatorId) return;
 
+  // Keep the signed-numbers app open to everyone through December 31, 2026.
+  if (simulatorId === "numbers" && Date.now() < Date.UTC(2027, 0, 1)) {
+    document.documentElement.dataset.accessGranted = "true";
+    return;
+  }
+
   const endpoint = "https://fundamatics.com/api/simulator-access";
   const storageKey = `fundamatics-access-${simulatorId}`;
   const isHebrew = (document.documentElement.lang || "he").toLowerCase().startsWith("he");
