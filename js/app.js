@@ -67,6 +67,13 @@ let messageState = null;
 let teacherSpeechState = null;
 let studentSpeechState = null;
 
+// Optional so blocked analytics never prevents use of the app.
+const analytics = window.signedNumbersAnalytics;
+const exerciseValues = () => JSON.stringify([
+  firstNumberInput.value, operatorInput.value, secondNumberInput.value
+]);
+let lastExerciseValues = exerciseValues();
+
 function sleep(milliseconds) {
   return new Promise(resolve => {
     window.setTimeout(resolve, milliseconds);
@@ -956,6 +963,7 @@ function setPlaybackMode(mode) {
 
   cancelPlayback();
   playbackMode = mode;
+  analytics?.firstInteraction("mode_select", playbackMode);
   updatePlaybackControls();
 }
 
@@ -1238,6 +1246,9 @@ async function renderTimelineStep(
   updatePlaybackControls();
   updateStudentBubblePosition();
   window.requestAnimationFrame(updateTeacherBubblePosition);
+  if (generation === playbackGeneration) {
+    analytics?.renderedStep(currentTimelineStep, animate, playbackMode);
+  }
   return generation === playbackGeneration;
 }
 
@@ -1268,6 +1279,7 @@ async function playTimeline() {
     await renderTimelineStep(0);
   }
 
+  analytics?.firstInteraction("solve_start", playbackMode);
   isPlaying = true;
   const generation = ++playbackGeneration;
   updatePlaybackControls();
@@ -1326,6 +1338,7 @@ async function advanceOneStep() {
     return;
   }
 
+  analytics?.firstInteraction("solve_start", playbackMode);
   isTransitioning = true;
   const generation = ++playbackGeneration;
   updatePlaybackControls();
@@ -1361,11 +1374,13 @@ async function runSimulation() {
 
 async function resetSimulator() {
   cancelPlayback();
+  analytics?.newExercise();
 
   firstNumberInput.value = 0;
   operatorInput.value = "+";
   secondNumberInput.value = 0;
   exerciseConfig = null;
+  lastExerciseValues = exerciseValues();
 
   if (!prepareExercise()) {
     return;
@@ -1376,6 +1391,8 @@ async function resetSimulator() {
 
 async function prepareNewExercise({ random = false } = {}) {
   cancelPlayback();
+  analytics?.newExercise();
+  if (random) analytics?.firstInteraction("random_exercise", playbackMode);
 
   if (random) {
     const generated = createRandomExercise();
@@ -1389,6 +1406,7 @@ async function prepareNewExercise({ random = false } = {}) {
   }
 
   exerciseConfig = null;
+  lastExerciseValues = exerciseValues();
   if (!prepareExercise()) {
     return;
   }
@@ -1415,6 +1433,16 @@ function handleExerciseInput() {
     return;
   }
 
+  const values = exerciseValues();
+  if (values !== lastExerciseValues) {
+    lastExerciseValues = values;
+    analytics?.newExercise();
+    if (firstNumberInput.value !== "" && secondNumberInput.value !== "" &&
+        isValidInteger(Number(firstNumberInput.value)) &&
+        isValidInteger(Number(secondNumberInput.value))) {
+      analytics?.firstInteraction("value_change", playbackMode);
+    }
+  }
   exerciseConfig = null;
   currentTimelineStep = 0;
   setStudentSpeech(null);
