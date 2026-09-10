@@ -108,7 +108,7 @@ function formatSpokenNumber(number) {
 
 function formatSpokenExercise(config) {
   return `${formatSpokenNumber(config.firstNumber)} ${i18n.t(
-    config.operationName.i18n
+    config.operator === "+" ? "operation.spokenAdd" : "operation.spokenSubtract"
   )} ${formatSpokenNumber(config.secondNumber)}`;
 }
 
@@ -275,11 +275,25 @@ function applyTranslations() {
     description.setAttribute("content", i18n.t("document.description"));
   }
 
+  document.querySelectorAll(".fundamatics-home-link, .fundamatics-brand").forEach(link => {
+    link.href = i18n.locale === "ar" ? "https://fundamatics.com/?lang=ar" : "https://fundamatics.com/";
+  });
+
   languageButtons.forEach(button => {
     const isActive = button.dataset.locale === i18n.locale;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
   });
+
+  if (exerciseConfig) {
+    turnIndicator.textContent = i18n.t("turn.indicator", {
+      direction: i18n.t(exerciseConfig.turnDirection.i18n)
+    });
+    stepCounter.textContent = i18n.t("walk.counter", {
+      current: Math.abs(currentPosition - exerciseConfig.firstNumber),
+      total: exerciseConfig.numberOfSteps
+    });
+  }
 
   renderState(messageBox, messageState);
   renderState(speechBubble, teacherSpeechState);
@@ -288,6 +302,7 @@ function applyTranslations() {
   updatePlaybackControls();
   updateStudentBubblePosition();
   window.requestAnimationFrame(updateTeacherBubblePosition);
+  document.documentElement.dataset.i18nReady = "true";
 }
 
 function updateBoardExercise() {

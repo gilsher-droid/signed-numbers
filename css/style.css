@@ -2027,3 +2027,27 @@ html[data-playback-mode="auto"] #nextStepButton {
     transform: none;
   }
 }
+
+/* Arabic text is RTL; the equation, controls, and number line keep their mathematical order. */
+html[lang="ar"] :is(body, button, input, select, .app-header h1, .fundamatics-home-link) {
+  font-family: Arial, Tahoma, sans-serif;
+  letter-spacing: normal;
+}
+html[lang="ar"] .app-header h1 { line-height: 1.4; }
+html[lang="ar"] :is(.speech-bubble, .board-message, .turn-indicator, .step-counter) {
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+html[lang="ar"] .speech-bubble { line-height: 1.6; }
+html[lang="ar"] .language-option[lang="ar"] { font-family: Arial, Tahoma, sans-serif; }
+
+html[lang="ar"]:not([data-i18n-ready]) #app { visibility: hidden; }
+html[lang="ar"] .app-header :is(h1, p) { white-space: normal; }
+@media (max-width: 390px) {
+  html[lang="ar"] #resetButton {
+    white-space: normal;
+    padding-inline: 2px;
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+}

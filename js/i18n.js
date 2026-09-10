@@ -13,6 +13,12 @@ class I18n {
   }
 
   getStoredLocale() {
+    const requestedLocale = new URLSearchParams(window.location.search).get("lang");
+    if (this.supportedLocales.includes(requestedLocale)) {
+      try { window.localStorage.setItem(this.storageKey, requestedLocale); } catch (_) {}
+      return requestedLocale;
+    }
+
     try {
       const storedLocale = window.localStorage.getItem(this.storageKey);
 
@@ -40,6 +46,9 @@ class I18n {
     }
 
     this.applyDocumentLanguage();
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", locale);
+    window.history.replaceState(window.history.state, "", url);
 
     window.dispatchEvent(
       new CustomEvent("signed-numbers:localechange", {
@@ -50,24 +59,127 @@ class I18n {
 
   applyDocumentLanguage() {
     document.documentElement.lang = this.locale;
-    document.documentElement.dir = this.locale === "he" ? "rtl" : "ltr";
+    document.documentElement.dir = ["he", "ar"].includes(this.locale) ? "rtl" : "ltr";
   }
 
   t(key, replacements = {}) {
+    if (this.locale === "ar" && ["speech.walk", "student.walk", "message.walk"].includes(key)
+        && Number(String(replacements.steps).replace(/[\u2066-\u2069]/g, "")) === 0) {
+      key += ".zero";
+    }
     const localeMessages = this.messages[this.locale] || {};
     const fallbackMessages = this.messages[this.defaultLocale] || {};
     const template = localeMessages[key] ?? fallbackMessages[key] ?? key;
 
     return Object.entries(replacements).reduce(
       (result, [replacementKey, value]) =>
-        result.replaceAll(`{${replacementKey}}`, String(value)),
+        result.replaceAll(`{${replacementKey}}`, this.locale === "ar" && typeof value === "number" ? `\u2066${value}\u2069` : String(value)),
       template
     );
   }
 }
 
 const messages = {
+  ar: {
+    "speech.walk.zero": "العدد الثاني هو {second}، لذا ابقَ في مكانك. عدد الخطوات: {steps}.",
+    "student.walk.zero": "أبقى في مكاني. عدد الخطوات: {steps}.",
+    "message.walk.zero": "يبقى الطالب في مكانه. عدد الخطوات: {steps}.",
+
+    "operation.spokenAdd": "زائد",
+    "operation.spokenSubtract": "ناقص",
+    "header.brandAria": "Fundamatics، رياضيات للحياة",
+    "document.title": "الأعداد الموجبة والسالبة: افهم العملية بالحركة | Fundamatics",
+    "document.description": "تطبيق تفاعلي لتعلّم جمع الأعداد الموجبة والسالبة وطرحها من خلال الاتجاه والحركة على خط الأعداد.",
+    "header.aria": "الأعداد الموجبة والسالبة من Fundamatics",
+    "header.title": "الأعداد الموجبة والسالبة: افهم العملية بالحركة",
+    "header.subtitle": "تعلّم جمع الأعداد الموجبة والسالبة وطرحها من خلال الحركة",
+    "header.home": "العودة إلى Fundamatics",
+    "language.label": "اختيار اللغة",
+    "controls.aria": "إعداد العملية الحسابية",
+    "controls.firstNumber": "أدخل العدد الأول",
+    "controls.operation": "العملية",
+    "controls.secondNumber": "أدخل العدد الثاني",
+    "controls.decrementFirst": "إنقاص العدد الأول بمقدار 1",
+    "controls.incrementFirst": "زيادة العدد الأول بمقدار 1",
+    "controls.decrementSecond": "إنقاص العدد الثاني بمقدار 1",
+    "controls.incrementSecond": "زيادة العدد الثاني بمقدار 1",
+    "controls.start": "حلّ العملية",
+    "controls.reset": "إعادة الضبط",
+    "controls.random": "عملية عشوائية",
+    "sound.off": "🔇 الصوت متوقف",
+    "sound.on": "🔊 الصوت مفعّل",
+    "playback.aria": "أدوات التحكم في التشغيل",
+    "playback.mode.label": "طريقة التقدم في العملية",
+    "playback.mode.auto": "تشغيل تلقائي",
+    "playback.mode.manual": "خطوة بخطوة",
+    "playback.previous": "العودة إلى الخطوة السابقة",
+    "playback.play": "تشغيل",
+    "playback.pause": "إيقاف مؤقت",
+    "playback.next": "الانتقال إلى الخطوة التالية",
+    "playback.continue": "متابعة",
+    "playback.autoStart": "تشغيل",
+    "playback.resume": "استئناف",
+    "playback.progress": "التقدم في العملية",
+    "classroom.aria": "محاكاة تفاعلية لصف دراسي",
+    "classroom.clock": "ساعة الحائط",
+    "classroom.window": "نافذة الصف",
+    "classroom.students": "طلاب يجلسون إلى طاولاتهم",
+    "numberLine.aria": "خط الأعداد على أرضية الصف، تزداد القيم من اليسار إلى اليمين",
+    "board.title": "اكتب العملية الحسابية",
+    "people.teacher": "المعلّم",
+    "people.student": "الطالب",
+    "message.initial": "يقف المعلّم والطالب بجانب اللوح، ويجلس بقية الطلاب في الصف.",
+    "speech.initial": "لنحلّ العملية المكتوبة على اللوح معًا.",
+    "error.integer": "أدخل أعدادًا صحيحة من سالب 30 إلى 30.",
+    "error.range": "الناتج خارج نطاق خط الأعداد في الصف.",
+    "message.exercise": "العملية على اللوح هي {exercise}.",
+    "speech.exerciseQuestion": "عمليتنا هي {exercise}. ما العدد الأول؟",
+    "speech.first": "العدد الأول هو {first}. قف على البلاطة التي تحمل العدد {first}.",
+    "student.go": "حسنًا، سأتجه إلى البلاطة التي تحمل العدد {first}.",
+    "message.walkTo": "يتجه الطالب إلى البلاطة {first}.",
+    "speech.position": "أنت الآن تقف على العدد {first}.",
+    "speech.operatorQuestion": "انظر الآن إلى عملية {operator}. ماذا تطلب منك أن تفعل؟",
+    "message.operatorFocus": "العملية هي {operator}.",
+    "speech.turn": "عملية {operator} تعني أن تدور بزاوية 90 درجة حتى تتجه بوجهك {direction}.",
+    "student.turn": "أدور بزاوية 90 درجة وأتجه بوجهي {direction} لأن العملية هي {operator}.",
+    "message.turn": "يدور الطالب بزاوية 90 درجة ويتجه بوجهه {direction}.",
+    "direction.right": "إلى اليمين",
+    "direction.left": "إلى اليسار",
+    "speech.walk": "العدد الثاني هو {second}. تحرّك {direction}، وعدد الخطوات {steps}.",
+    "student.walk": "أتحرك الآن {direction}، وعدد الخطوات {steps}.",
+    "message.walk": "يتحرك الطالب {direction}، وعدد الخطوات {steps}.",
+    "direction.forward": "إلى الأمام",
+    "direction.backward": "إلى الخلف",
+    "direction.still": "دون تغيير المكان",
+    "movement.forward": "نتحرك إلى الأمام",
+    "movement.backward": "نتحرك إلى الخلف",
+    "movement.stay": "نبقى في مكاننا",
+    "number.positive": "موجب",
+    "number.negative": "سالب",
+    "number.zero": "صفر",
+    "number.minus": "سالب",
+    "operation.add": "الجمع",
+    "operation.subtract": "الطرح",
+    "speech.secondNumber": "انظر إلى العدد الثاني: {second}. إنه {numberKind}، لذلك {movement}. كم خطوة؟ {steps}.",
+    "message.secondNumber": "العدد الثاني {second} هو {numberKind}: {movement}، وعدد الخطوات {steps}.",
+    "turn.indicator": "⁦90°⁩ {direction}",
+    "walk.counter": "الخطوة {current} من {total}",
+    "speech.question": "على أي بلاطة تقف الآن؟",
+    "student.answer": "أقف على البلاطة {position}.",
+    "message.arrived": "وصل الطالب إلى البلاطة {position}.",
+    "speech.answer": "صحيح، إذن ناتج العملية هو {position}.",
+    "message.answer": "خلاصة المعلّم: ناتج العملية هو {position}.",
+    "completion.new": "عملية جديدة",
+    "completion.replay": "تشغيل من جديد"
+},
   he: {
+    "speech.walk.zero": "המספר השני הוא {second}, לכן נשארים במקום. מספר הצעדים: {steps}.",
+    "student.walk.zero": "אני נשאר במקום. מספר הצעדים: {steps}.",
+    "message.walk.zero": "התלמיד נשאר במקום. מספר הצעדים: {steps}.",
+
+    "operation.spokenAdd": "ועוד",
+    "operation.spokenSubtract": "פחות",
+    "header.brandAria": "Fundamatics — Maths for life",
     "document.title":
       "מספרים מכוונים — להרגיש את התרגיל דרך הגוף — Fundamatics",
     "document.description":
@@ -171,6 +283,13 @@ const messages = {
     "completion.replay": "הפעל שוב"
   },
   en: {
+    "speech.walk.zero": "The second number is {second}, so stay in place. Number of steps: {steps}.",
+    "student.walk.zero": "I stay in place. Number of steps: {steps}.",
+    "message.walk.zero": "The student stays in place. Number of steps: {steps}.",
+
+    "operation.spokenAdd": "add",
+    "operation.spokenSubtract": "subtract",
+    "header.brandAria": "Fundamatics — Maths for life",
     "document.title":
       "Signed Numbers — Feel the Exercise Through Movement — Fundamatics",
     "document.description":
