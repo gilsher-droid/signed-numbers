@@ -1,5 +1,7 @@
 (function () {
   "use strict";
+  // Retain only the fact that the landing is private, never its token.
+  window.fundamaticsPrivateLanding = !!window.location.hash;
 
   const simulatorByHost = {
     "linear.fundamatics.com": "linear",

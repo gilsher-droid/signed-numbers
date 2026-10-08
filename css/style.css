@@ -2051,3 +2051,10 @@ html[lang="ar"] .app-header :is(h1, p) { white-space: normal; }
     line-height: 1.2;
   }
 }
+/* Non-blocking optional analytics choice, available throughout the app. */
+.analytics-consent-panel { position: fixed; inset-inline: 16px; bottom: 56px; z-index: 10000; max-width: 640px; margin-inline: auto; padding: 20px; background: #fff; color: #0b1e3a; border: 2px solid #0b3a8a; border-radius: 16px; box-shadow: 0 4px 24px #0003; }
+.analytics-consent-panel[hidden] { display: none; }
+.analytics-consent-panel h2 { margin: 0 0 8px; font-size: 20px; }
+.analytics-consent-panel p { margin: 0 0 12px; }
+.analytics-consent-panel button, .analytics-preferences { padding: 10px 16px; margin: 4px; border: 1px solid #0b3a8a; border-radius: 12px; color: #0b1e3a; background: #fff; font: inherit; cursor: pointer; }
+.analytics-preferences { display: block; margin: 12px auto; }
