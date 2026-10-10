@@ -3,15 +3,15 @@ const assert=require('node:assert/strict');
 const vm=require('node:vm');
 const fs=require('node:fs');
 const path=require('node:path');
-function load({choice=null,lang='en',search='',hash='',host='numbers.fundamatics.com',storageFails=false,privateLanding=false,access=true}={}) {
+function load({choice=null,lang='en',search='',hash='',host='numbers.fundamatics.com',storageFails=false,privateLanding=false,access=true,referrer='https://fundamatics.com/research/foo?token=secret'}={}) {
   const stored=new Map(),listeners=new Map(),elements=[],scripts=[];let reloads=0;
   if(choice)stored.set('signed-numbers.analytics-consent',JSON.stringify({version:1,choice,expiresAt:Date.now()+10000}));
   class Element { constructor(tag){this.tag=tag;this.children=[];this.events={};elements.push(this);} setAttribute(){} append(...v){this.children.push(...v);} addEventListener(n,f){this.events[n]=f;} focus(){} }
   const localStorage={getItem:k=>{if(storageFails)throw Error();return stored.get(k)||null;},setItem:(k,v)=>{if(storageFails)throw Error();stored.set(k,v);}};
   const location={hostname:host,origin:'https://'+host,pathname:'/',search,hash,reload:()=>reloads++};
-  const document={title:'Numbers',documentElement:{lang,dataset:{accessGranted:String(access)}},createElement:t=>new Element(t),head:{appendChild:s=>scripts.push(s)},body:new Element('body')};
+  const document={referrer,title:'Numbers',documentElement:{lang,dataset:{accessGranted:String(access)}},createElement:t=>new Element(t),head:{appendChild:s=>scripts.push(s)},body:new Element('body')};
   const window={location,localStorage,fundamaticsPrivateLanding:privateLanding,addEventListener:(n,f)=>{if(!listeners.has(n))listeners.set(n,[]);listeners.get(n).push(f);},dispatchEvent:e=>{for(const f of listeners.get(e.type)||[])f(e);}};
-  const context=vm.createContext({window,document,location,localStorage,URLSearchParams,Date,Event});
+  const context=vm.createContext({window,document,location,localStorage,URL,URLSearchParams,Date,Event});
   for(const file of ['analytics.js','consent.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',file),'utf8'),context);
   return {window,document,scripts,elements,stored,events:()=>window.dataLayer.map(a=>Array.from(a)).filter(a=>a[0]==='event'),configs:()=>window.dataLayer.map(a=>Array.from(a)).filter(a=>a[0]==='config'),choose:text=>elements.find(e=>e.tag==='button'&&e.textContent===text).events.click(),reloads:()=>reloads};
 }
@@ -42,4 +42,8 @@ test('selected Arabic language is attached and consent UI updates',()=>{
 });
 test('storage failure defaults denied but explicit choice works for this document',()=>{
  const s=load({storageFails:true});assert.equal(s.scripts.length,0);s.choose('Accept analytics');assert.equal(s.scripts.length,1);s.choose('Reject analytics');assert.equal(s.window.signedNumbersConsent.allowed(),false);
+});
+
+test('campaign labels reach app configuration after its own consent; referrer secrets do not',()=>{
+ const s=load({search:'?lang=he&utm_source=facebook&utm_medium=paid_social&utm_campaign=parents_he_pilot_01&utm_content=exercise_b'});assert.equal(s.configs().length,0);s.choose('Accept analytics');const config=s.configs()[0][2];assert.equal(config.campaign_name,'parents_he_pilot_01');assert.equal(config.campaign_content,'exercise_b');assert.equal(config.page_referrer,'https://fundamatics.com/');s.window.signedNumbersAnalytics.firstInteraction('start','auto');assert.ok(!JSON.stringify(s.window.dataLayer).includes('secret'));assert.equal(s.events().at(-1)[2].page_referrer,'https://fundamatics.com/');
 });
