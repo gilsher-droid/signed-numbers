@@ -47,3 +47,7 @@ test('storage failure defaults denied but explicit choice works for this documen
 test('campaign labels reach app configuration after its own consent; referrer secrets do not',()=>{
  const s=load({search:'?lang=he&utm_source=facebook&utm_medium=paid_social&utm_campaign=parents_he_pilot_01&utm_content=exercise_b'});assert.equal(s.configs().length,0);s.choose('Accept analytics');const config=s.configs()[0][2];assert.equal(config.campaign_name,'parents_he_pilot_01');assert.equal(config.campaign_content,'exercise_b');assert.equal(config.page_referrer,'https://fundamatics.com/');s.window.signedNumbersAnalytics.firstInteraction('start','auto');assert.ok(!JSON.stringify(s.window.dataLayer).includes('secret'));assert.equal(s.events().at(-1)[2].page_referrer,'https://fundamatics.com/');
 });
+
+test('consented app events include campaign and ad labels for event-level reports',()=>{
+ const s=load({choice:'accepted',search:'?utm_source=facebook&utm_medium=paid_social&utm_campaign=parents_he_pilot_01&utm_content=exercise_b'});s.window.signedNumbersAnalytics.firstInteraction('start','auto');const event=s.events().at(-1);assert.equal(event[2].campaign_label,'parents_he_pilot_01');assert.equal(event[2].ad_label,'exercise_b');
+});

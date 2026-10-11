@@ -20,7 +20,7 @@
   function send(name, parameters) {
     if (!initialized || !window.signedNumbersConsent?.allowed()) return false;
     try {
-      window.gtag("event", name, { send_to: measurementId, page_location: pageLocation(), page_referrer: pageReferrer(), app_id: "signed_numbers", language: document.documentElement.lang, ...parameters });
+      window.gtag("event", name, { send_to: measurementId, page_location: pageLocation(), page_referrer: pageReferrer(), app_id: "signed_numbers", language: document.documentElement.lang, campaign_label: campaign().campaign_name, ad_label: campaign().campaign_content, ...parameters });
       return true;
     } catch (_) {
       // Measurement must not interrupt the teaching experience.
