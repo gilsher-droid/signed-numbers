@@ -22,8 +22,23 @@
 
   const endpoint = "https://fundamatics.com/api/simulator-access";
   const storageKey = `fundamatics-access-${simulatorId}`;
-  const isHebrew = (document.documentElement.lang || "he").toLowerCase().startsWith("he");
-  const copy = isHebrew
+  const requested = new URLSearchParams(location.search).get("lang");
+  let storedLanguage;
+  try { storedLanguage = localStorage.getItem("signed-numbers.locale"); } catch (_) {}
+  const locale = ["he", "en", "ar"].includes(requested) ? requested
+    : ["he", "en", "ar"].includes(storedLanguage) ? storedLanguage
+    : (document.documentElement.lang || "he");
+  const isHebrew = locale === "he";
+  const isRtl = locale === "he" || locale === "ar";
+  const copy = locale === "ar" ? {
+    title: "يلزم رمز دخول",
+    body: "هذا التطبيق متاح باستخدام رمز شخصي يصدر مسبقًا.",
+    label: "رمز الدخول",
+    button: "افتح التطبيق",
+    checking: "جارٍ التحقق…",
+    error: "الرمز غير صحيح أو غير فعّال أو انتهت صلاحيته.",
+    home: "العودة إلى التطبيقات"
+  } : isHebrew
     ? {
         title: "נדרש קוד כניסה",
         body: "היישום הזה זמין באמצעות קוד אישי שניתן מראש.",
@@ -47,9 +62,9 @@
   const style = document.createElement("style");
   style.textContent = `
     html.fm-access-pending body > :not(#fundamatics-access-gate) { visibility: hidden !important; }
-    #fundamatics-access-gate { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 20px; background: #fffbe7; color: #0b1e3a; font-family: Manrope, Arial, sans-serif; direction: ${isHebrew ? "rtl" : "ltr"}; }
+    #fundamatics-access-gate { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 20px; background: #fffbe7; color: #0b1e3a; font-family: Manrope, Arial, sans-serif; direction: ${isRtl ? "rtl" : "ltr"}; }
     #fundamatics-access-gate * { box-sizing: border-box; }
-    .fm-access-card { width: min(440px, 100%); padding: 32px; border: 3px solid #0b3a8a; border-radius: 24px; background: #fff; box-shadow: 8px 8px 0 #0b3a8a; text-align: ${isHebrew ? "right" : "left"}; }
+    .fm-access-card { width: min(440px, 100%); padding: 32px; border: 3px solid #0b3a8a; border-radius: 24px; background: #fff; box-shadow: 8px 8px 0 #0b3a8a; text-align: ${isRtl ? "right" : "left"}; }
     .fm-access-brand { margin: 0 0 24px; color: #0b3a8a; font: 800 16px/1 Montserrat, Arial, sans-serif; letter-spacing: .08em; }
     .fm-access-card h1 { margin: 0; color: #0b1e3a; font: 800 28px/1.2 Montserrat, Arial, sans-serif; }
     .fm-access-card p { margin: 12px 0 24px; color: #536273; line-height: 1.55; }
@@ -106,7 +121,7 @@
           <div class="fm-access-error" role="alert"></div>
           <button type="submit">${copy.button}</button>
         </form>
-        <a class="fm-access-home" href="https://fundamatics.com/simulators">${copy.home}</a>
+        <a class="fm-access-home" href="https://fundamatics.com/simulators?lang=${locale}">${copy.home}</a>
       </div>`;
     document.body.appendChild(gate);
     const form = gate.querySelector("form");

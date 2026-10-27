@@ -276,7 +276,7 @@ function applyTranslations() {
   }
 
   document.querySelectorAll(".fundamatics-home-link, .fundamatics-brand").forEach(link => {
-    link.href = i18n.locale === "ar" ? "https://fundamatics.com/?lang=ar" : "https://fundamatics.com/";
+    link.href = `https://fundamatics.com/?lang=${i18n.locale}`;
   });
 
   languageButtons.forEach(button => {
